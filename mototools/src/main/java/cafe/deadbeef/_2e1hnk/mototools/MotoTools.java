@@ -47,15 +47,6 @@ public class MotoTools {
 
 	public static void main(String[] args) throws Exception {
 
-		/*
-		 * logger.info("Setting Proxy");
-		 * 
-		 * System.setProperty("http.proxyHost", "black-barracuda.black.ndr");
-		 * System.setProperty("http.proxyPort", "3128");
-		 * System.setProperty("https.proxyHost", "black-barracuda.black.ndr");
-		 * System.setProperty("https.proxyPort", "3128");
-		 */
-
 		// Load up radio profiles
 		profiles.put(2344327, new DP4800UHF());
 		// profiles.put(1, new DM4400UHF1());
