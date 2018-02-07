@@ -1,0 +1,20 @@
+<RX_TG_LIST_DLT_TYPE Applicable="Enabled" ListID="0" SortType="None">
+    <RX_TG_LIST_DLH_TYPE Applicable="Enabled" ListID="0">
+        <RXTG_LSTCTG Applicable="Enabled" ListID="0">1</RXTG_LSTCTG>
+        <RXTG_LEDSZ Applicable="Enabled" ListID="0">6</RXTG_LEDSZ>
+        <RXTG_LEQMAX Applicable="Enabled" ListID="0">16</RXTG_LEQMAX>
+        <RXTG_LLEQMAX Applicable="Enabled" ListID="0">1</RXTG_LLEQMAX>
+        <RX_TG_LIST_DLH_TYPE_FTLLISHTYPE Applicable="Enabled" ListID="0">RX_TG_LIST_DLL_TYPE</RX_TG_LIST_DLH_TYPE_FTLLISHTYPE>
+        <RX_TG_LIST_DLH_TYPE_FTLLISHID Applicable="Enabled" ListID="0">0</RX_TG_LIST_DLH_TYPE_FTLLISHID>
+        <RXTG_RXTGLISTALIAS Applicable="Enabled" ListID="0">TG100</RXTG_RXTGLISTALIAS>
+    </RX_TG_LIST_DLH_TYPE>
+    <RX_TG_LIST_DLL_TYPE Applicable="Enabled" ListID="0" ListLetID="0">
+        <RX_TG_LIST_DLL_TYPE_NTLLISHTYPE Applicable="Enabled" ListID="0" ListLetID="0">NULL</RX_TG_LIST_DLL_TYPE_NTLLISHTYPE>
+        <RX_TG_LIST_DLL_TYPE_NTLLISHID Applicable="Enabled" ListID="0" ListLetID="0">0</RX_TG_LIST_DLL_TYPE_NTLLISHID>
+        <RXTG_LLEQ Applicable="Enabled" ListID="0" ListLetID="0">1</RXTG_LLEQ>
+        <RXTG_DGUCLCOMP Applicable="Enabled" ListID="0" ListLetID="0" TypeID="DIGITAL_UCL_DLL_TYPE">2</RXTG_DGUCLCOMP>
+        <RXTG_DGUCLCOMPTYPE Applicable="Enabled" ListID="0" ListLetID="0">DIGITAL_UCL_DLL_TYPE</RXTG_DGUCLCOMPTYPE>
+        <RXTG_DGUCLCOMPID Applicable="Enabled" ListID="0" ListLetID="0">2</RXTG_DGUCLCOMPID>
+        <RXTGL_RESERVED Applicable="Enabled" ListID="0" ListLetID="0">0</RXTGL_RESERVED>
+    </RX_TG_LIST_DLL_TYPE>
+</RX_TG_LIST_DLT_TYPE>

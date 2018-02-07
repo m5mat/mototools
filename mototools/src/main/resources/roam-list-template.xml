@@ -1,0 +1,23 @@
+<ST_SRCH_DLT_TYPE Applicable="Enabled" ListID="0" SortType="None">
+  <ST_SRCH_DLH_TYPE Applicable="Enabled" ListID="0">
+    <SSP_LSTCTG Applicable="Enabled" ListID="0">1</SSP_LSTCTG>
+    <SSP_LEDSZ Applicable="Enabled" ListID="0">6</SSP_LEDSZ>
+    <SSP_LEQMAX Applicable="Enabled" ListID="0">15</SSP_LEQMAX>
+    <SSP_LLEQMAX Applicable="Enabled" ListID="0">1</SSP_LLEQMAX>
+    <ST_SRCH_DLH_TYPE_FTLLISHTYPE Applicable="Enabled" ListID="0">NULL</ST_SRCH_DLH_TYPE_FTLLISHTYPE>
+    <ST_SRCH_DLH_TYPE_FTLLISHID Applicable="Enabled" ListID="0">0</ST_SRCH_DLH_TYPE_FTLLISHID>
+    <SSP_PR1MEMTYPE Applicable="Enabled" ListID="0">NONE</SSP_PR1MEMTYPE>
+    <SSP_PR1MEMID Applicable="Enabled" ListID="0">0</SSP_PR1MEMID>
+    <SSP_PR2MEMTYPE Applicable="Enabled" ListID="0">NONE</SSP_PR2MEMTYPE>
+    <SSP_PR2MEMID Applicable="Enabled" ListID="0">0</SSP_PR2MEMID>
+    <SSP_DSGTXMEMTYPE Applicable="Enabled" ListID="0">SELECTED</SSP_DSGTXMEMTYPE>
+    <SSP_DSGTXMEMID Applicable="Enabled" ListID="0">0</SSP_DSGTXMEMID>
+    <SSP_SCANLISTALIAS Applicable="Enabled" ListID="0">TestRoamList</SSP_SCANLISTALIAS>
+    <SSP_PERSITEROAMINGRSSITHRESHOLDENABLE Applicable="Enabled" ListID="0">1</SSP_PERSITEROAMINGRSSITHRESHOLDENABLE>
+    <SSP_TLKSCNEN Applicable="Enabled" ListID="0">1</SSP_TLKSCNEN>
+    <SSP_PLLOCKCHMARKEN Applicable="Enabled" ListID="0">0</SSP_PLLOCKCHMARKEN>
+    <SSP_LSTDYNMCDTMNHMCH Applicable="Enabled" ListID="0">0</SSP_LSTDYNMCDTMNHMCH>
+    <SSP_RSSITHRFORROAM Applicable="Disabled" ListID="0">-108</SSP_RSSITHRFORROAM>
+    <SSP_RESERVED Applicable="Enabled" ListID="0">0</SSP_RESERVED>
+  </ST_SRCH_DLH_TYPE>
+</ST_SRCH_DLT_TYPE>

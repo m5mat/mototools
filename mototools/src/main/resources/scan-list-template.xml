@@ -1,0 +1,32 @@
+<SCAN_PER_DLT_TYPE Applicable="Enabled" ListID="0" SortType="None">
+    <SCAN_PER_DLH_TYPE Applicable="Enabled" ListID="0">
+        <SP_SCLSTTYPE Applicable="Enabled" ListID="0">CONVSCAN</SP_SCLSTTYPE>
+        <SP_LSTCTG Applicable="Enabled" ListID="0">1</SP_LSTCTG>
+        <SP_LEDSZ Applicable="Enabled" ListID="0">6</SP_LEDSZ>
+        <SP_LEQMAX Applicable="Enabled" ListID="0">15</SP_LEQMAX>
+        <SP_LLEQMAX Applicable="Enabled" ListID="0">1</SP_LLEQMAX>
+        <SCAN_PER_DLH_TYPE_FTLLISHTYPE Applicable="Enabled" ListID="0">SCAN_PER_DLL_TYPE</SCAN_PER_DLH_TYPE_FTLLISHTYPE>
+        <SCAN_PER_DLH_TYPE_FTLLISHID Applicable="Enabled" ListID="0">0</SCAN_PER_DLH_TYPE_FTLLISHID>
+        <SP_VTSCPRETMDL Applicable="NA" ListID="0">0</SP_VTSCPRETMDL>
+        <SP_PR1MEM Applicable="Enabled" ListID="0" TypeID="NONE">0</SP_PR1MEM>
+        <SP_PR1MEMTYPE Applicable="Enabled" ListID="0">NONE</SP_PR1MEMTYPE>
+        <SP_PR1MEMID Applicable="Enabled" ListID="0">0</SP_PR1MEMID>
+        <SP_PR2MEM Applicable="Disabled" ListID="0" TypeID="NONE">0</SP_PR2MEM>
+        <SP_PR2MEMTYPE Applicable="Disabled" ListID="0">NONE</SP_PR2MEMTYPE>
+        <SP_PR2MEMID Applicable="Disabled" ListID="0">0</SP_PR2MEMID>
+        <SP_DSGTXMEM Applicable="Enabled" ListID="0" TypeID="SELECTED">0</SP_DSGTXMEM>
+        <SP_DSGTXMEMTYPE Applicable="Enabled" ListID="0">SELECTED</SP_DSGTXMEMTYPE>
+        <SP_DSGTXMEMID Applicable="Enabled" ListID="0">0</SP_DSGTXMEMID>
+        <SCAN_RAD_TBPRIOSAMP Applicable="Disabled" ListID="0">2000</SCAN_RAD_TBPRIOSAMP>
+        <SP_SCANLISTALIAS Applicable="Enabled" ListID="0">ScanZone1</SP_SCANLISTALIAS>
+        <SP_DISPVTCHRCV Applicable="NA" ListID="0">0</SP_DISPVTCHRCV>
+        <SP_ERLMT Applicable="NA" ListID="0">0</SP_ERLMT>
+        <SP_DISPTXCH Applicable="NA" ListID="0">0</SP_DISPTXCH>
+        <SP_TLKSCNEN Applicable="Enabled" ListID="0">1</SP_TLKSCNEN>
+        <SP_PLLOCKCHMARKEN Applicable="Enabled" ListID="0">1</SP_PLLOCKCHMARKEN>
+        <SP_SCPLTYPE Applicable="Enabled" ListID="0">PRIORNONPRIORCHAN</SP_SCPLTYPE>
+        <SC_SCANSIGHT Applicable="Enabled" ListID="0">2000</SC_SCANSIGHT>
+        <SP_SCHSKIPCYCLE Applicable="Enabled" ListID="0">0</SP_SCHSKIPCYCLE>
+        <SP_ATACKSC Applicable="Enabled" ListID="0">0</SP_ATACKSC>
+    </SCAN_PER_DLH_TYPE>
+</SCAN_PER_DLT_TYPE>
