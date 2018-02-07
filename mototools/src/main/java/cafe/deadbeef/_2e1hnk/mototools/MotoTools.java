@@ -1,20 +1,10 @@
 package cafe.deadbeef._2e1hnk.mototools;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -75,9 +65,9 @@ public class MotoTools {
 
 			// codeplug = populateTestConfig(codeplug);
 			codeplug = addSimplexChannels(codeplug);
-			codeplug = populateCodeplugFromUKRepeaters(codeplug);
-			codeplug = addReflectors(codeplug);
-			codeplug = addContactsFromLastHeard(codeplug);
+//			codeplug = populateCodeplugFromUKRepeaters(codeplug);
+//			codeplug = addReflectors(codeplug);
+//			codeplug = addContactsFromLastHeard(codeplug);
 
 			logger.info("Writing out codeplug XML");
 			codeplug.toXml(String.format("utils/codeplugs/MotoTools-%s-ID%d.xml",
