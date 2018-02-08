@@ -1,6 +1,7 @@
 package cafe.deadbeef._2e1hnk.mototools;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -57,28 +58,28 @@ public class MotoTools {
 			radioProfile = candidateRadioProfile;
 
 			logger.info("Loading codeplug template");
-			Codeplug codeplug = new Codeplug("utils/codeplugs/DP4800-template.xml", radioProfile);
+			Codeplug codeplug = new Codeplug("utils/codeplugs/DP4800-test.ctb.xml", radioProfile);
 
 			// Set radio ID
-			logger.info("Setting Radio ID " + radioId);
-			codeplug.setRadioId(radioId);
+//			logger.info("Setting Radio ID " + radioId);
+//			codeplug.setRadioId(radioId);
 
 			// codeplug = populateTestConfig(codeplug);
-			codeplug = addSimplexChannels(codeplug);
+//			codeplug = addSimplexChannels(codeplug);
 //			codeplug = populateCodeplugFromUKRepeaters(codeplug);
 //			codeplug = addReflectors(codeplug);
 //			codeplug = addContactsFromLastHeard(codeplug);
 
-			logger.info("Writing out codeplug XML");
-			codeplug.toXml(String.format("utils/codeplugs/MotoTools-%s-ID%d.xml",
-					candidateRadioProfile.getClass().getSimpleName(), radioId));
+			String outputFileName = String.format("utils/codeplugs/MotoTools-%s-ID%d.xml",
+					candidateRadioProfile.getClass().getSimpleName(), radioId);
+			logger.info("Writing out codeplug XML to " + outputFileName);
+			codeplug.toXml(outputFileName);
 
 		}
 
 		logger.info("Signing codeplugs");
 
-		Runtime.getRuntime().exec("cmd /c start \"Signing Codeplugs...\" cd utils\\codeplugs && sign-codeplugs.bat");
-		// Runtime.getRuntime().exec("cmd /k start \"Signing Codeplugs...\" cd");
+		Runtime.getRuntime().exec("cmd /c start \"Signing Codeplugs...\" sign-codeplug.bat", null, new File("utils\\codeplugs"));
 
 		logger.info("Done");
 	}
