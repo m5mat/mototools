@@ -505,14 +505,14 @@ public class Codeplug {
 					try {
 						ZNPERASGNDLTTYPE roamingZone = this
 								.findOrCreateZone(network.roamName.get(talkgroup.getTalkGroupId()));
-	
-						int roamingChannel = this.addDigitalChannel(talkgroup.getSlot(), colourCode, name, txFreq, rxFreq,
-								talkgroup, scanList);
-	
+
+						int roamingChannel = this.addDigitalChannel(talkgroup.getSlot(), colourCode, name, txFreq,
+								rxFreq, talkgroup, scanList);
+
 						this.addChannelToZone(roamingChannel, roamingZone);
-	
+
 						this.addChannelToRoamList(network.roamName.get(talkgroup.getTalkGroupId()), roamingChannel);
-					} catch ( ChannelListFullException e ) {
+					} catch (ChannelListFullException e) {
 						MotoTools.logger.error("Channel List Full", e);
 					}
 
@@ -624,7 +624,7 @@ public class Codeplug {
 		} catch (JAXBException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch ( ChannelListFullException e ) {
+		} catch (ChannelListFullException e) {
 			MotoTools.logger.error("Channel List Full", e);
 		}
 	}
@@ -663,7 +663,11 @@ public class Codeplug {
 		Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 		CNVPERCMPTYPE channel = (CNVPERCMPTYPE) jaxbUnmarshaller.unmarshal(channelTemplate);
 		channel.setListID(BigInteger.valueOf(entryNumber));
-
+		/*
+		 * Sometimes xjc gives us a list (or two lists) containing all the children.
+		 * I've no idea why.
+		 */
+		/*
 		for (Object child : channel.getCPPERSTYPEOrCPSELECT5CHAN()) {
 
 			try {
@@ -707,7 +711,7 @@ public class Codeplug {
 			}
 
 			if (child instanceof CPTGLISTIT) {
-				((CPTGLISTIT) child).setAlias(talkgroup.talkGroupName);
+				//((CPTGLISTIT) child).setAlias(talkgroup.talkGroupName);
 				((CPTGLISTIT) child).setValue(BigInteger.valueOf(rxListId));
 			}
 
@@ -791,7 +795,8 @@ public class Codeplug {
 			}
 
 		}
-
+		*/
+		
 		codeplug.getAPPPARTITION().getCNVPERCMPTYPEGRP().getCNVPERCMPTYPE().add(channel);
 
 		if (talkgroup.addToScanList) {
@@ -836,7 +841,12 @@ public class Codeplug {
 		Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 		CNVPERCMPTYPE channel = (CNVPERCMPTYPE) jaxbUnmarshaller.unmarshal(channelTemplate);
 		channel.setListID(BigInteger.valueOf(entryNumber));
-
+		
+		/*
+		 * Sometimes xjc gives us a list (or two lists) containing all the children.
+		 * I've no idea why.
+		 */
+		/*
 		for (Object child : channel.getCPPERSTYPEOrCPSELECT5CHAN()) {
 
 			try {
@@ -916,7 +926,7 @@ public class Codeplug {
 			}
 
 		}
-
+		*/
 		codeplug.getAPPPARTITION().getCNVPERCMPTYPEGRP().getCNVPERCMPTYPE().add(channel);
 
 		return entryNumber;
@@ -969,7 +979,7 @@ public class Codeplug {
 		rxList.getRXTGLISTDLHTYPE().getRXTGLLEQMAX().setListID(BigInteger.valueOf(entryNumber));
 		rxList.getRXTGLISTDLHTYPE().getRXTGLSTCTG().setListID(BigInteger.valueOf(entryNumber));
 		rxList.getRXTGLISTDLHTYPE().getRXTGRXTGLISTALIAS().setListID(BigInteger.valueOf(entryNumber));
-		rxList.getRXTGLISTDLHTYPE().getRXTGRXTGLISTALIAS().setValue(talkGroupName);
+		rxList.getRXTGLISTDLHTYPE().getRXTGRXTGLISTALIAS().setContent(talkGroupName);
 		rxList.getRXTGLISTDLLTYPE().setListID(BigInteger.valueOf(entryNumber));
 		rxList.getRXTGLISTDLLTYPE().getRXTGDGUCLCOMP().setListID(BigInteger.valueOf(entryNumber));
 		rxList.getRXTGLISTDLLTYPE().getRXTGDGUCLCOMPID().setListID(BigInteger.valueOf(entryNumber));
@@ -1144,7 +1154,7 @@ public class Codeplug {
 
 	private STSRCHDLTTYPE findRoamList(String roamListName) throws RoamListNotFoundException {
 		for (STSRCHDLTTYPE roamList : codeplug.getAPPPARTITION().getSTSRCHDLHTYPEGRP().getSTSRCHDLTTYPE()) {
-			if (roamList.getSTSRCHDLHTYPE().getSSPSCANLISTALIAS().getValue().equals(roamListName)) {
+			if (roamList.getSTSRCHDLHTYPE().getSSPSCANLISTALIAS().getContent().equals(roamListName)) {
 				MotoTools.logger
 						.debug("Found roam list " + roamListName + " (ID " + roamList.getListID().intValue() + ")");
 				return roamList;
@@ -1193,8 +1203,8 @@ public class Codeplug {
 			roamList.getSTSRCHDLHTYPE().getSSPLLEQMAX().setListID(BigInteger.valueOf(entryNumber));
 			roamList.getSTSRCHDLHTYPE().getSSPLSTCTG().setListID(BigInteger.valueOf(entryNumber));
 			roamList.getSTSRCHDLHTYPE().getSSPLSTDYNMCDTMNHMCH().setListID(BigInteger.valueOf(entryNumber));
-			roamList.getSTSRCHDLHTYPE().getSSPPERSITEROAMINGRSSITHRESHOLDENABLE()
-					.setListID(BigInteger.valueOf(entryNumber));
+			//roamList.getSTSRCHDLHTYPE().getSSPPERSITEROAMINGRSSITHRESHOLDENABLE()
+			//		.setListID(BigInteger.valueOf(entryNumber));
 			roamList.getSTSRCHDLHTYPE().getSSPPLLOCKCHMARKEN().setListID(BigInteger.valueOf(entryNumber));
 			roamList.getSTSRCHDLHTYPE().getSSPPR1MEMID().setListID(BigInteger.valueOf(entryNumber));
 			roamList.getSTSRCHDLHTYPE().getSSPPR1MEMTYPE().setListID(BigInteger.valueOf(entryNumber));
@@ -1203,7 +1213,7 @@ public class Codeplug {
 			roamList.getSTSRCHDLHTYPE().getSSPRESERVED().setListID(BigInteger.valueOf(entryNumber));
 			roamList.getSTSRCHDLHTYPE().getSSPRSSITHRFORROAM().setListID(BigInteger.valueOf(entryNumber));
 			roamList.getSTSRCHDLHTYPE().getSSPSCANLISTALIAS().setListID(BigInteger.valueOf(entryNumber));
-			roamList.getSTSRCHDLHTYPE().getSSPSCANLISTALIAS().setValue(roamListName);
+			roamList.getSTSRCHDLHTYPE().getSSPSCANLISTALIAS().setContent(roamListName);
 			roamList.getSTSRCHDLHTYPE().getSSPTLKSCNEN().setListID(BigInteger.valueOf(entryNumber));
 			roamList.getSTSRCHDLHTYPE().getSTSRCHDLHTYPEFTLLISHID().setListID(BigInteger.valueOf(entryNumber));
 			roamList.getSTSRCHDLHTYPE().getSTSRCHDLHTYPEFTLLISHTYPE().setListID(BigInteger.valueOf(entryNumber));
