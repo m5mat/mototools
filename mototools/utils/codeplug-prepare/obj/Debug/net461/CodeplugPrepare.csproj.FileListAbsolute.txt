@@ -1,0 +1,9 @@
+C:\Users\macarus\Desktop\MOTOTRBO\codeplug-prepare\bin\Debug\net461\CodeplugPrepare.exe
+C:\Users\macarus\Desktop\MOTOTRBO\codeplug-prepare\bin\Debug\net461\CodeplugPrepare.pdb
+C:\Users\macarus\Desktop\MOTOTRBO\codeplug-prepare\bin\Debug\net461\dnlib.dll
+C:\Users\macarus\Desktop\MOTOTRBO\codeplug-prepare\obj\Debug\net461\CodeplugPrepare.csprojResolveAssemblyReference.cache
+C:\Users\macarus\Desktop\MOTOTRBO\codeplug-prepare\obj\Debug\net461\CodeplugPrepare.csproj.CoreCompileInputs.cache
+C:\Users\macarus\Desktop\MOTOTRBO\codeplug-prepare\obj\Debug\net461\CodeplugPrepare.AssemblyInfoInputs.cache
+C:\Users\macarus\Desktop\MOTOTRBO\codeplug-prepare\obj\Debug\net461\CodeplugPrepare.AssemblyInfo.cs
+C:\Users\macarus\Desktop\MOTOTRBO\codeplug-prepare\obj\Debug\net461\CodeplugPrepare.exe
+C:\Users\macarus\Desktop\MOTOTRBO\codeplug-prepare\obj\Debug\net461\CodeplugPrepare.pdb

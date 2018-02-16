@@ -58,18 +58,21 @@ public class MotoTools {
 			radioProfile = candidateRadioProfile;
 
 			logger.info("Loading codeplug template");
-			Codeplug codeplug = new Codeplug("utils/codeplugs/DP4800-test.ctb.xml", radioProfile);
+			Codeplug codeplug = new Codeplug("utils/codeplugs/DP4800-template-3.xml", radioProfile);
 
 			// Set radio ID
-//			logger.info("Setting Radio ID " + radioId);
-//			codeplug.setRadioId(radioId);
+			logger.info("Setting Radio ID " + radioId);
+			codeplug.setRadioId(radioId);
 
 			// codeplug = populateTestConfig(codeplug);
-//			codeplug = addSimplexChannels(codeplug);
-//			codeplug = populateCodeplugFromUKRepeaters(codeplug);
-//			codeplug = addReflectors(codeplug);
-//			codeplug = addContactsFromLastHeard(codeplug);
+			codeplug = addSimplexChannels(codeplug);				// Checked - OK
+			codeplug = populateCodeplugFromUKRepeaters(codeplug);	// Checked - Error
+			codeplug = addReflectors(codeplug);						// Checked - OK
+			codeplug = addContactsFromLastHeard(codeplug);			// Checked - OK
 
+			// Just testing...
+			//codeplug.addAnalogueRepeater("Simplex", "U272/SU16", 433.4000, 433.4000, new Tone(123), true);
+			
 			String outputFileName = String.format("utils/codeplugs/MotoTools-%s-ID%d.xml",
 					candidateRadioProfile.getClass().getSimpleName(), radioId);
 			logger.info("Writing out codeplug XML to " + outputFileName);

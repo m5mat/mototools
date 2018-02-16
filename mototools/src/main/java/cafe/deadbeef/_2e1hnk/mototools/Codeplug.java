@@ -655,6 +655,8 @@ public class Codeplug {
 		if (entryNumber >= radioProfile.getMaxChannels()) {
 			throw new ChannelListFullException();
 		}
+		
+		BigInteger listId = BigInteger.valueOf(entryNumber);
 
 		File channelTemplate = new File(
 				getClass().getClassLoader().getResource("digital-channel-template.xml").getFile());
@@ -662,7 +664,40 @@ public class Codeplug {
 
 		Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 		CNVPERCMPTYPE channel = (CNVPERCMPTYPE) jaxbUnmarshaller.unmarshal(channelTemplate);
-		channel.setListID(BigInteger.valueOf(entryNumber));
+		channel.setListID(listId);
+		
+		/* 
+		 * Try using reflection...
+		 */
+		List<Method> methods = findGetters(channel.getClass());
+		for ( Method method : methods ) {
+			try {
+				Object child = method.invoke(channel);
+				Method setListID = child.getClass().getMethod("setListID", new Class[] {BigInteger.class});
+				setListID.invoke(child, listId);
+			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | SecurityException e) {
+				e.printStackTrace();
+			} catch (NoSuchMethodException e) {
+				// This is ok, just skip it
+			}
+		}
+		
+		channel.getCPCNVPERSALIAS().setContent(name);
+		channel.getCPTXFREQ().setValue(BigDecimal.valueOf(txFreq));
+		channel.getCPRXFREQ().setValue(BigDecimal.valueOf(rxFreq));
+		if (slot == 1) {
+			channel.getCPSLTASSGMNT().setValue("SLOT1");
+		} else {
+			channel.getCPSLTASSGMNT().setValue("SLOT2");
+		}
+		channel.getCPCOLORCODE().setValue(BigInteger.valueOf(colourcode));
+		channel.getCPTGLISTIT().setValue(BigInteger.valueOf(rxListId));
+		channel.getCPTGLISTITID().setValue(BigInteger.valueOf(rxListId));
+		//channel.getCPUKPPERS().setAlias(talkgroup.talkGroupName);
+		channel.getCPUKPPERS().setValue(BigInteger.valueOf(tgId));
+		channel.getCPUKPPERSID().setValue(BigInteger.valueOf(tgId));
+		
+		
 		/*
 		 * Sometimes xjc gives us a list (or two lists) containing all the children.
 		 * I've no idea why.
@@ -833,6 +868,8 @@ public class Codeplug {
 		if (entryNumber >= radioProfile.getMaxChannels()) {
 			throw new ChannelListFullException();
 		}
+		
+		BigInteger listId = BigInteger.valueOf(entryNumber);
 
 		File channelTemplate = new File(
 				getClass().getClassLoader().getResource("analogue-channel-template.xml").getFile());
@@ -841,6 +878,91 @@ public class Codeplug {
 		Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 		CNVPERCMPTYPE channel = (CNVPERCMPTYPE) jaxbUnmarshaller.unmarshal(channelTemplate);
 		channel.setListID(BigInteger.valueOf(entryNumber));
+		
+		/* 
+		 * Try using reflection...
+		 */
+		List<Method> methods = findGetters(channel.getClass());
+		for ( Method method : methods ) {
+			try {
+				Object child = method.invoke(channel);
+				Method setListID = child.getClass().getMethod("setListID", new Class[] {BigInteger.class});
+				setListID.invoke(child, listId);
+			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | SecurityException e) {
+				e.printStackTrace();
+			} catch (NoSuchMethodException e) {
+				// This is ok, just skip it
+			}
+		}
+		
+		channel.getCPCNVPERSALIAS().setContent(name);
+		channel.getCPTXFREQ().setValue(BigDecimal.valueOf(txFreq));
+		channel.getCPRXFREQ().setValue(BigDecimal.valueOf(rxFreq));
+		channel.getCPTXTPLCODE().setValue(tone.getCode());
+		channel.getCPTXTTPLFREQ().setValue(BigDecimal.valueOf(tone.getFreq()));
+		
+		/*
+		 * Loop through all children elements and set the ListID and other channel characteristics
+		 */
+		/*
+		channel.getCP625EDMEN().setListID(listId);
+		channel.getCP625EDMPRFLD().setListID(listId);
+		channel.getCPADVRFAGC().setListID(listId);
+		channel.getCPAESPRVCYIT().setListID(listId);
+		channel.getCPAESPRVCYITID().setListID(listId);
+		channel.getCPAESPRVCYITTYPE().setListID(listId);
+		channel.getCPAESSTATUS().setListID(listId);
+		channel.getCPAFCEN().setListID(listId);
+		channel.getCPALLSYSCALLEN().setListID(listId);
+		channel.getCPANALOGVOICESCRAMBLINGENABLE().setListID(listId);
+		channel.getCPARSEN().setListID(listId);
+		channel.getCPARSPLUS().setListID(listId);
+		channel.getCPARTSMODETYPE().setListID(listId);
+		channel.getCPARTSTXPRD().setListID(listId);
+		channel.getCPAUTHORISATION().setListID(listId);
+		channel.getCPAUTORESETDEAUTHOR().setListID(listId);
+		channel.getCPAUTORESETMODE().setListID(listId);
+		channel.getCPBUSYLEDEN().setListID(listId);
+		channel.getCPCALLBUTTON1KEYUPTEL().setListID(listId);
+		channel.getCPCALLBUTTON1KEYUPTELTYPE().setListID(listId);
+		channel.getCPCALLBUTTON2KEYUPTEL().setListID(listId);
+		channel.getCPCALLBUTTON2KEYUPTELTYPE().setListID(listId);
+		channel.getCPCALLBUTTON3KEYUPTEL().setListID(listId);
+		channel.getCPCALLBUTTON3KEYUPTELTYPE().setListID(listId);
+		channel.getCPCALLBUTTON4KEYUPTEL().setListID(listId);
+		channel.getCPCALLBUTTON4KEYUPTELTYPE().setListID(listId);
+		channel.getCPCALLBUTTON5KEYUPTEL().setListID(listId);
+		channel.getCPCALLBUTTON5KEYUPTELTYPE().setListID(listId);
+		channel.getCPCALLBUTTON6KEYUPTEL().setListID(listId);
+		channel.getCPCALLBUTTON6KEYUPTELTYPE().setListID(listId);
+		channel.getCPCAPPLUSBEACONINTERVAL().setListID(listId);
+		channel.getCPCAPPLUSCHANNUMSLOT1().setListID(listId);
+		channel.getCPCAPPLUSCHANNUMSLOT2().setListID(listId);
+		channel.getCPCAPPLUSPREFLEV().setListID(listId);
+		channel.getCPCBCHANNEL().setListID(listId);
+		channel.getCPCHASSGNTYPE().setListID(listId);
+		channel.getCPCHNLBWDTH().setListID(listId);
+		channel.getCPCNIHBTSLTN().setListID(listId);
+		channel.getCPCNVPERSALIAS().setListID(listId);
+		channel.getCPCOLORCODE().setListID(listId);
+		channel.getCPCOMPSTATE().setListID(listId);
+		channel.getCPCSBKDATAENABLE().setListID(listId);
+		channel.getCPCTOTRESETDURATION().setListID(listId);
+		channel.getCPCTOTTYPE().setListID(listId);
+		channel.getCPCVFNLITEM().setListID(listId);
+		channel.getCPCVFNLITEMID().setListID(listId);
+		channel.getCPCVFNLITEMTYPE().setListID(listId);
+		channel.getCPDATALMT().setListID(listId);
+		channel.getCPDATAREVCHANLISTIT().setListID(listId);
+		channel.getCPDATAREVCHANLISTITID().setListID(listId);
+		channel.getCPDATAREVCHANLISTITTYPE().setListID(listId);
+		channel.getCPDEVMEDFORINDDATACALL().setListID(listId);
+		channel.getCPDISCONTEL().setListID(listId);
+		channel.getCPDISCONTELID().setListID(listId);
+		channel.getCPDISCONTELTYPE().setListID(listId);
+		channel.getCPEMACKALERTEN().setListID(listId);
+		// This list is incomplete. It started to get ridiculous so I used reflection instead
+		*/
 		
 		/*
 		 * Sometimes xjc gives us a list (or two lists) containing all the children.
@@ -864,6 +986,9 @@ public class Codeplug {
 			} catch (SecurityException e) {
 				e.printStackTrace();
 			}
+			*/
+			
+			/*
 
 			if (child instanceof CPCNVPERSALIAS) {
 				((CPCNVPERSALIAS) child).setContent(name);
@@ -997,10 +1122,16 @@ public class Codeplug {
 
 	private int findTalkgroupRxListId(Talkgroup talkgroup) throws Exception {
 		int tgId = this.findTalkgroupId(talkgroup);
-		for (RXTGLISTDLTTYPE rxList : codeplug.getAPPPARTITION().getRXTGLISTDLHTYPEGRP().getRXTGLISTDLTTYPE()) {
-			if (rxList.getRXTGLISTDLLTYPE().getRXTGDGUCLCOMPID().getValue().intValue() == tgId) {
-				return rxList.getListID().intValue();
+		
+		try {
+			for (RXTGLISTDLTTYPE rxList : codeplug.getAPPPARTITION().getRXTGLISTDLHTYPEGRP().getRXTGLISTDLTTYPE()) {
+				MotoTools.logger.debug("Checking RxList ID " + rxList.getListID().toString());
+				if (rxList.getRXTGLISTDLLTYPE().getRXTGDGUCLCOMPID().getValue().intValue() == tgId) {
+					return rxList.getListID().intValue();
+				}
 			}
+		} catch (NullPointerException e) {
+			// Nothing to do
 		}
 
 		return this.addRxList(tgId, "TG" + talkgroup.getTalkGroupId());
@@ -1241,17 +1372,18 @@ public class Codeplug {
 		// Need to set the channel to an IP Site Connect channel
 		// TODO: This doesn't seem to be the correct entry!
 
+		/*
 		for (CNVPERCMPTYPE channel : codeplug.getAPPPARTITION().getCNVPERCMPTYPEGRP().getCNVPERCMPTYPE()) {
 			if (channel.getListID().intValue() == channelId) {
 				for (Object child : channel.getCPPERSTYPEOrCPSELECT5CHAN()) {
 					if (child instanceof CPMLTSTPSNLTIND) {
 						((CPMLTSTPSNLTIND) child).setValue(BigInteger.valueOf(1));
-						;
 					}
 				}
 			}
 		}
-
+		*/
+		
 		// The listLetID seems to be unique to the scan list entry, across all scan
 		// lists (and issued sequentially)
 		int entryNumber = 0;
