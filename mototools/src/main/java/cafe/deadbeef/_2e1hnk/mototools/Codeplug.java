@@ -1,6 +1,7 @@
 package cafe.deadbeef._2e1hnk.mototools;
 
 import java.io.File;
+
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.StringWriter;
@@ -30,6 +31,16 @@ import cafe.deadbeef._2e1hnk.mototools.network.Salop;
 import cafe.deadbeef._2e1hnk.mototools.network.Talkgroup;
 import cafe.deadbeef._2e1hnk.mototools.radioprofiles.RadioProfile;
 import cafe.deadbeef._2e1hnk.mototools.xml.*;
+
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import javax.imageio.ImageIO;
 
 public class Codeplug {
 
@@ -696,6 +707,7 @@ public class Codeplug {
 		//channel.getCPUKPPERS().setAlias(talkgroup.talkGroupName);
 		channel.getCPUKPPERS().setValue(BigInteger.valueOf(tgId));
 		channel.getCPUKPPERSID().setValue(BigInteger.valueOf(tgId));
+		channel.getCPSCANPERSLISTITID().setValue(scanList.getListID());
 		
 		
 		/*
@@ -1061,11 +1073,7 @@ public class Codeplug {
 	private int findTalkgroupId(Talkgroup talkgroup) throws Exception {
 		for (DIGITALUCLDLLTYPE contact : codeplug.getAPPPARTITION().getDIGITALUCLDLHTYPEGRP().getDIGITALUCLDLTTYPE()
 				.getDIGITALUCLDLLTYPE()) {
-			// if (contact.getDUCALLLSTID().getValue().intValue() ==
-			// talkgroup.getTalkGroupId()
-			// && contact.getDUCALLALIAS().getValue().equals(talkgroup.getTalkGroupName()))
-			// {
-			if (contact.getDUCALLLSTID().getValue().intValue() == talkgroup.getTalkGroupId()) {
+			if (contact.getDUCALLLSTID().getValue().equals(BigInteger.valueOf(talkgroup.getTalkGroupId())) ) {
 				int tgId = contact.getListLetID().intValue();
 				return tgId;
 			} else {
@@ -1073,7 +1081,7 @@ public class Codeplug {
 						+ contact.getDUCALLLSTID().getValue().intValue() + ")");
 			}
 		}
-
+		MotoTools.logger.info("Couldn't find " + talkgroup.getTalkGroupName() + ", creating it now...");
 		int tgId = this.addContact(talkgroup.getTalkGroupId(), "TG" + talkgroup.getTalkGroupId(), false);
 
 		return tgId;
@@ -1121,20 +1129,22 @@ public class Codeplug {
 	}
 
 	private int findTalkgroupRxListId(Talkgroup talkgroup) throws Exception {
-		int tgId = this.findTalkgroupId(talkgroup);
+		BigInteger tgId = BigInteger.valueOf(this.findTalkgroupId(talkgroup));
 		
-		try {
-			for (RXTGLISTDLTTYPE rxList : codeplug.getAPPPARTITION().getRXTGLISTDLHTYPEGRP().getRXTGLISTDLTTYPE()) {
-				MotoTools.logger.debug("Checking RxList ID " + rxList.getListID().toString());
-				if (rxList.getRXTGLISTDLLTYPE().getRXTGDGUCLCOMPID().getValue().intValue() == tgId) {
-					return rxList.getListID().intValue();
-				}
+		MotoTools.logger.info("Finding RxList for talkgroup " + talkgroup.talkGroupName + " which has ID " + tgId);
+		
+		for (RXTGLISTDLTTYPE rxList : codeplug.getAPPPARTITION().getRXTGLISTDLHTYPEGRP().getRXTGLISTDLTTYPE()) {
+			MotoTools.logger.debug("Checking RxList ID " + rxList.getListID().toString());
+			RXTGLISTDLLTYPE rXTGLISTDLLTYPE = rxList.getRXTGLISTDLLTYPE();
+			RXTGDGUCLCOMPID rXTGDGUCLCOMPID = rXTGLISTDLLTYPE.getRXTGDGUCLCOMPID();
+			BigInteger value = rXTGDGUCLCOMPID.getValue();
+			if (value.equals(tgId) ) {
+				MotoTools.logger.info("Found RxList for talkgroup " + talkgroup.talkGroupName + ": " + rxList.getListID());
+				return rxList.getListID().intValue();
 			}
-		} catch (NullPointerException e) {
-			// Nothing to do
 		}
 
-		return this.addRxList(tgId, "TG" + talkgroup.getTalkGroupId());
+		return this.addRxList(tgId.intValue(), "TG" + talkgroup.getTalkGroupId());
 	}
 
 	private ZNPERASGNDLTTYPE findZone(String zoneName) throws ZoneNotFoundException {
@@ -1736,6 +1746,42 @@ public class Codeplug {
 		marshallerObj.marshal(codeplug, writer);
 
 		return writer.toString();
+	}
+	
+	/**
+	 * Generate a Base64-encoded boot image
+	 */
+	public String bootImage(String version) {
+        BufferedImage img = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = img.createGraphics();
+        Font font = new Font("Arial", Font.PLAIN, 48);
+        g2d.setFont(font);
+        FontMetrics fm = g2d.getFontMetrics();
+        int width = fm.stringWidth(version);
+        int height = fm.getHeight();
+        g2d.dispose();
+
+        img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        g2d = img.createGraphics();
+        g2d.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
+        g2d.setRenderingHint(RenderingHints.KEY_DITHERING, RenderingHints.VALUE_DITHER_ENABLE);
+        g2d.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+        g2d.setFont(font);
+        fm = g2d.getFontMetrics();
+        g2d.setColor(Color.BLACK);
+        g2d.drawString(version, 0, fm.getAscent());
+        g2d.dispose();
+        try {
+            ImageIO.write(img, "png", new File("Text.png"));
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+		return null;
 	}
 
 	/**

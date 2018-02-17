@@ -153,7 +153,7 @@ public class MotoTools {
 					// repeaterDetails.get(16).text().equals("LICENSED") ) {
 					if (repeaterDetails.get(16).text().equals("NOT.OP")) {
 						logger.debug("Skipping " + repeaterDetails.get(0).text() + " " + repeaterDetails.get(8).text()
-								+ "(" + repeaterDetails.get(16).text() + ")");
+								+ " (" + repeaterDetails.get(16).text() + ")");
 						continue;
 					}
 
@@ -254,6 +254,7 @@ public class MotoTools {
 								new Tone(toneFreq), // CTCSS Tone Frequency
 								true // Add to scan list?
 						);
+
 					}
 				} catch (IllegalStateException e) {
 					logger.error("Error adding repeater", e);
