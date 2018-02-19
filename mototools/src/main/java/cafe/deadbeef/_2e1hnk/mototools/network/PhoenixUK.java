@@ -31,16 +31,17 @@ public class PhoenixUK extends AbstractNetwork {
 				"GB7PE", "GB7PY", "GB7SK", "GB7WS" });
 		this.roamRepeaters.put(850, new String[] { "" });
 		this.roamRepeaters.put(860, new String[] { "GB7HS", "GB7HX", "GB7LE", "GB7RE", "GB7RV", "GB7TD" });
-		this.roamRepeaters.put(870, new String[] { "GB7HM" });
+		this.roamRepeaters.put(870, new String[] { "GB7HM", "GB7BJ" });
 		this.roamRepeaters.put(880, new String[] { "GB7HB", "GB7HZ", "GB7LY", "GB7UL" });
 
+		// NOTE: Maximum of 15 in scan list!
 		this.addTalkgroup(1, 9, "Local (Pri)", false, true);
 		this.addTalkgroup(2, 9, "Local (Sec)", false, true);
 		this.addTalkgroup(1, 1, "WW", true, true);
 		this.addTalkgroup(1, 2, "Europe", true, true);
 		this.addTalkgroup(1, 13, "WW Eng", true, true);
 		this.addTalkgroup(1, 80, "UK UA1", false, true);
-		this.addTalkgroup(1, 81, "UK UA2", false, true);
+		this.addTalkgroup(1, 81, "UK UA2", false, false);
 		this.addTalkgroup(1, 82, "UK UA3", false, false);
 		this.addTalkgroup(1, 83, "UK UA4", false, false);
 		this.addTalkgroup(1, 84, "UK UA5", false, false);

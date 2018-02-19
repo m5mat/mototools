@@ -38,6 +38,56 @@ public class MotoTools {
 
 	public static void main(String[] args) throws Exception {
 
+		// Create region filters
+		
+		// Dummy region
+		Filter dummyFilter = new Filter();
+		dummyFilter.addToFilterKey("region", "dummy");
+		
+		// Exclude southern regions to create a codeplug for use in the north
+		Filter northFilter = new Filter();
+		northFilter.addToFilterKey("region", "SW");
+		northFilter.addToFilterKey("region", "SE");
+		northFilter.addToFilterKey("region", "MID");
+		northFilter.addToFilterKey("region", "WM");
+
+		// Exclude extreme southern and northern regions to create a codeplug for use in
+		// central UK
+		Filter centralFilter = new Filter();
+		centralFilter.addToFilterKey("region", "SCO");
+		centralFilter.addToFilterKey("region", "NI");
+		centralFilter.addToFilterKey("region", "SW");
+		centralFilter.addToFilterKey("region", "SE");
+
+		// Exclude northern regions to create a codeplug for use in the south
+		Filter southFilter = new Filter();
+		southFilter.addToFilterKey("region", "SCO");
+		southFilter.addToFilterKey("region", "NI");
+		southFilter.addToFilterKey("region", "NOR");
+		
+		// Exclude northern and south-eastern regions to create a codeplug for use in the south west
+		Filter southWestFilter = new Filter();
+		southWestFilter.addToFilterKey("region", "SCO");
+		southWestFilter.addToFilterKey("region", "NI");
+		southWestFilter.addToFilterKey("region", "NOR");
+		southWestFilter.addToFilterKey("region", "SE");
+		
+		// Exclude northern and welsh regions to create a codeplug for use in the south-east
+		Filter southEastFilter = new Filter();
+		southEastFilter.addToFilterKey("region", "SCO");
+		southEastFilter.addToFilterKey("region", "NI");
+		southEastFilter.addToFilterKey("region", "NOR");
+		southEastFilter.addToFilterKey("region", "WM");
+		
+		Map<String, Filter> filters = new HashMap<String, Filter>();
+		// filters.put("Dummy-Region", dummyFilter);
+		filters.put("North-Region", northFilter);
+		filters.put("Central-Region", centralFilter);
+		filters.put("South-Region", southFilter);
+		filters.put("South-West-Region", southWestFilter);
+		filters.put("South-East-Region", southEastFilter);
+		
+
 		// Load up radio profiles
 		profiles.put(2344327, new DP4800UHF());
 		// profiles.put(1, new DM4400UHF1());
@@ -57,32 +107,45 @@ public class MotoTools {
 			logger.info("Using radio profile " + candidateRadioProfile.getClass().getSimpleName());
 			radioProfile = candidateRadioProfile;
 
-			logger.info("Loading codeplug template");
-			Codeplug codeplug = new Codeplug("utils/codeplugs/DP4800-template-3.xml", radioProfile);
+			for ( String filterID : filters.keySet() ) {
+				logger.info("Loading codeplug template");
+				Codeplug codeplug = new Codeplug("utils/codeplugs/DP4800-template-3.xml", radioProfile);
 
-			// Set radio ID
-			logger.info("Setting Radio ID " + radioId);
-			codeplug.setRadioId(radioId);
+				codeplug.bootImage("test");
+				
+				// Set radio ID
+				logger.info("Setting Radio ID " + radioId);
+				codeplug.setRadioId(radioId);
 
-			// codeplug = populateTestConfig(codeplug);
-			codeplug = addSimplexChannels(codeplug);				// Checked - OK
-			codeplug = populateCodeplugFromUKRepeaters(codeplug);	// Checked - Error
-			codeplug = addReflectors(codeplug);						// Checked - OK
-			codeplug = addContactsFromLastHeard(codeplug);			// Checked - OK
-
-			// Just testing...
-			//codeplug.addAnalogueRepeater("Simplex", "U272/SU16", 433.4000, 433.4000, new Tone(123), true);
-			
-			String outputFileName = String.format("utils/codeplugs/MotoTools-%s-ID%d.xml",
-					candidateRadioProfile.getClass().getSimpleName(), radioId);
-			logger.info("Writing out codeplug XML to " + outputFileName);
-			codeplug.toXml(outputFileName);
-
+				Filter filter = filters.get(filterID);
+				
+				// codeplug = populateTestConfig(codeplug);
+				codeplug = addSimplexChannels(codeplug); // Checked - OK
+				
+				// Bodge in Malvern
+				codeplug.addDigitalRepeater("GB7BJ Mal Phoenix", // Repeater Name (Used for zone name)
+						439.7375, // Repeater output frequency (device receive frequency)
+						430.7375, // Repeater input frequency (device transmit frequency)
+						13, // DMR Colour code
+						new PhoenixUK(radioProfile), // Connectivity
+						true // Add channels to scan list?
+				);
+				
+				codeplug = populateCodeplugFromUKRepeaters(codeplug, filter); // Checked - Error
+//				codeplug = addReflectors(codeplug); // Checked - OK (but uses a lot of contact slots!)
+				codeplug = addContactsFromLastHeard(codeplug); // Checked - OK
+	
+				String outputFileName = String.format("utils/codeplugs/MotoTools-%s-ID%d-%s.xml",
+						candidateRadioProfile.getClass().getSimpleName(), radioId, filterID);
+				logger.info("Writing out codeplug XML to " + outputFileName);
+				codeplug.toXml(outputFileName);
+			}
 		}
 
 		logger.info("Signing codeplugs");
 
-		Runtime.getRuntime().exec("cmd /c start \"Signing Codeplugs...\" sign-codeplug.bat", null, new File("utils\\codeplugs"));
+		Runtime.getRuntime().exec("cmd /c start \"Signing Codeplugs...\" sign-codeplug.bat", null,
+				new File("utils\\codeplugs"));
 
 		logger.info("Done");
 	}
@@ -93,21 +156,23 @@ public class MotoTools {
 
 		logger.info("Adding digital repeaters");
 		// Add a digital Repeater
-		codeplug.addDigitalRepeater("GB7CC", // Repeater Name (Used for zone name)
+		
+		codeplug.addDigitalRepeater("GB7CC Cleeve", // Repeater Name (Used for zone name)
 				430.2750, // Repeater output frequency (device receive frequency)
 				439.2750, // Repeater input frequency (device transmit frequency)
 				2, // DMR Colour code
 				new Salop(radioProfile), // Connectivity
 				true // Add channels to scan list?
 		);
-
-		codeplug.addDigitalRepeater("GB7KM", // Repeater Name (Used for zone name)
+/*
+		codeplug.addDigitalRepeater("GB7KM Swindon", // Repeater Name (Used for zone name)
 				439.6625, // Repeater output frequency (device receive frequency)
 				430.6625, // Repeater input frequency (device transmit frequency)
 				3, // DMR Colour code
 				new PhoenixUK(radioProfile), // Connectivity
 				true // Add channels to scan list?
 		);
+*/		
 
 		logger.info("Adding analogue repeaters");
 		// Add an analogue Repeater
@@ -128,13 +193,13 @@ public class MotoTools {
 		);
 
 		logger.info("Adding contacts");
-		codeplug.addContact(123456, "2E1HNK - Matt", true);
-		codeplug.addContact(12345, "G3MXH - Terry", true);
+		codeplug.addContact(123456, "2E1HNK Matt", true);
+		codeplug.addContact(12345, "G3MXH Terry", true);
 
 		return codeplug;
 	}
 
-	public static Codeplug populateCodeplugFromUKRepeaters(Codeplug codeplug)
+	public static Codeplug populateCodeplugFromUKRepeaters(Codeplug codeplug, Filter filter)
 			throws IOException, ParseException, NumberFormatException, JAXBException {
 
 		Document doc = Jsoup.connect("https://www.ukrepeater.net/repeaterlist1.htm").get();
@@ -148,6 +213,7 @@ public class MotoTools {
 				try {
 					Elements repeaterDetails = repeaterElement.children();
 
+					// TODO: Add this to the filter
 					// skip any no-operational repeaters
 					// if ( repeaterDetails.get(16).text().equals("NOT.OP") ||
 					// repeaterDetails.get(16).text().equals("LICENSED") ) {
@@ -157,6 +223,14 @@ public class MotoTools {
 						continue;
 					}
 
+					// Check the region name against the filter
+					if (!filter.permits("region", repeaterDetails.get(10).text())) {
+						logger.info("Skipping " + repeaterDetails.get(0).text() + " " + repeaterDetails.get(8).text()
+								+ " due to region filter (" + repeaterDetails.get(10).text() + ")");
+						continue;
+					}
+					
+					
 					String[] rawModes = repeaterDetails.get(4).text().split("/");
 					Set<String> modes = new HashSet<String>();
 
@@ -214,6 +288,7 @@ public class MotoTools {
 							}
 
 							// Add digital Repeater
+							
 							codeplug.addDigitalRepeater(repeaterCallsignLocation, // Repeater Name (Used for zone name)
 									Double.parseDouble(repeaterDetails.get(2).text()), // Repeater output frequency
 																						// (device
@@ -225,6 +300,7 @@ public class MotoTools {
 									network, // Connectivity
 									true // Add channels to scan list?
 							);
+							
 						}
 					} else if (modes.contains("AV") || modes.contains("ANL")) {
 						// Add analogue Repeater

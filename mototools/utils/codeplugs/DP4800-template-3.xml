@@ -3059,7 +3059,7 @@
       </SCAN_PER_DLT_TYPE>
     </SCAN_PER_DLH_TYPE_GRP>
     <ZN_PER_ASGN_DLH_TYPE_GRP>
-      <ZN_PER_ASGN_DLT_TYPE Applicable="Enabled" ListID="1" SortType="Position">
+      <ZN_PER_ASGN_DLT_TYPE Applicable="Enabled" ListID="1" SortType="Name">
         <ZN_PER_ASGN_DLH_TYPE Applicable="Enabled" ListID="1">
           <ZP_LSTCTG Applicable="Enabled" ListID="1">1</ZP_LSTCTG>
           <ZP_LEDSZ Applicable="Enabled" ListID="1">6</ZP_LEDSZ>

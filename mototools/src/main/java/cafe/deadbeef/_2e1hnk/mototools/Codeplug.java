@@ -20,6 +20,7 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
 import cafe.deadbeef._2e1hnk.mototools.exceptions.ChannelListFullException;
+import cafe.deadbeef._2e1hnk.mototools.exceptions.ChannelNotFoundException;
 import cafe.deadbeef._2e1hnk.mototools.exceptions.ContactListFullException;
 import cafe.deadbeef._2e1hnk.mototools.exceptions.RadioIdOutOfRangeException;
 import cafe.deadbeef._2e1hnk.mototools.exceptions.RoamListNotFoundException;
@@ -420,11 +421,11 @@ public class Codeplug {
 		for (Talkgroup talkgroup : network.talkgroups) {
 
 			MotoTools.logger.info("Adding " + name + " " + talkgroup.getTalkGroupName());
-
+			
 			try {
 				channelListLetID = this.addDigitalChannel(talkgroup.getSlot(), colourCode, talkgroup.getTalkGroupName(),
-						txFreq, rxFreq, talkgroup, scanList);
-
+							txFreq, rxFreq, talkgroup, scanList, false);
+			
 				MotoTools.logger
 						.debug("Adding Talkgroup " + talkgroup.getTalkGroupName() + " as ID " + channelListLetID);
 
@@ -495,19 +496,23 @@ public class Codeplug {
 				// roaming group and create the roam list too!
 
 				channelListLetID++;
+				
 			} catch (ChannelListFullException e) {
 				MotoTools.logger.error("Channel List Full", e);
 			}
+			
 		}
 
 		// Add the zone to the codeplug
 		codeplug.getAPPPARTITION().getZNPERASGNDLHTYPEGRP().getZNPERASGNDLTTYPE().add(zone);
 
-		// Add roaming channels. This nees to be done after the main zone is written to
+		// Add roaming channels. This needs to be done after the main zone is written to
 		// the codeplug to avoid a race condition
 
+		
 		for (Talkgroup talkgroup : network.talkgroups) {
 			// Check if the talkgroup is a roaming talkgroup
+			
 			if (talkgroup.isRoamingTalkgroup()) {
 				// Check if the repeater is in the roaming TG list (or list = All)
 				if (Arrays.asList(network.roamRepeaters.get(talkgroup.getTalkGroupId()))
@@ -518,11 +523,12 @@ public class Codeplug {
 								.findOrCreateZone(network.roamName.get(talkgroup.getTalkGroupId()));
 
 						int roamingChannel = this.addDigitalChannel(talkgroup.getSlot(), colourCode, name, txFreq,
-								rxFreq, talkgroup, scanList);
-
+								rxFreq, talkgroup, scanList, true);
+						
 						this.addChannelToZone(roamingChannel, roamingZone);
 
 						this.addChannelToRoamList(network.roamName.get(talkgroup.getTalkGroupId()), roamingChannel);
+						
 					} catch (ChannelListFullException e) {
 						MotoTools.logger.error("Channel List Full", e);
 					}
@@ -530,6 +536,7 @@ public class Codeplug {
 				}
 			}
 		}
+		
 	}
 
 	// Add an analogue Repeater
@@ -641,7 +648,7 @@ public class Codeplug {
 	}
 
 	public int addDigitalChannel(int slot, int colourcode, String name, double txFreq, double rxFreq,
-			Talkgroup talkgroup, SCANPERDLTTYPE scanList) throws JAXBException, ChannelListFullException {
+			Talkgroup talkgroup, SCANPERDLTTYPE scanList, boolean isRoamChannel) throws JAXBException, ChannelListFullException {
 		// TODO: Verify inputs
 
 		// find the talkgroup ID number
@@ -707,8 +714,19 @@ public class Codeplug {
 		//channel.getCPUKPPERS().setAlias(talkgroup.talkGroupName);
 		channel.getCPUKPPERS().setValue(BigInteger.valueOf(tgId));
 		channel.getCPUKPPERSID().setValue(BigInteger.valueOf(tgId));
-		channel.getCPSCANPERSLISTITID().setValue(scanList.getListID());
-		
+
+		if (scanList != null && !isRoamChannel) {
+			// Enable Auto-scan
+			channel.getCPUTOSCANEN().setApplicable("Enabled");
+			channel.getCPUTOSCANEN().setValue(BigInteger.valueOf(1));
+			
+			// Set the Channel scan/roam list (or try to - this doesn't seem to work...)
+			channel.getCPSCANPERSLISTIT().setApplicable("NA");
+			channel.getCPSCANPERSLISTITTYPE().setValue("SCAN_PER_DLH_TYPE");
+			channel.getCPSCANPERSLISTITID().setValue(scanList.getListID());
+			channel.getCPSCNROAMLISTIT().setValue(scanList.getListID());
+			channel.getCPSCNROAMLISTIT().setTypeID("SCAN_PER_DLH_TYPE");
+		}
 		
 		/*
 		 * Sometimes xjc gives us a list (or two lists) containing all the children.
@@ -846,8 +864,13 @@ public class Codeplug {
 		
 		codeplug.getAPPPARTITION().getCNVPERCMPTYPEGRP().getCNVPERCMPTYPE().add(channel);
 
-		if (talkgroup.addToScanList) {
-			this.addChannelToScanList(scanList, entryNumber);
+		if (talkgroup.addToScanList && scanList != null && !isRoamChannel) {
+			try {
+				this.addChannelToScanList(scanList, entryNumber);
+			} catch (ChannelNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 
 		return entryNumber;
@@ -860,8 +883,7 @@ public class Codeplug {
 
 			this.addChannelToScanList(scanListName, channelId);
 
-			return channelId;
-		
+			return channelId;	
 	}
 
 	private int addAnalogueChannel(String name, double txFreq, double rxFreq, Tone tone)
@@ -1146,6 +1168,15 @@ public class Codeplug {
 
 		return this.addRxList(tgId.intValue(), "TG" + talkgroup.getTalkGroupId());
 	}
+	
+	private CNVPERCMPTYPE findChannel(int listId) throws ChannelNotFoundException {
+		for ( CNVPERCMPTYPE channel : codeplug.getAPPPARTITION().getCNVPERCMPTYPEGRP().getCNVPERCMPTYPE() ) {
+			if ( channel.getListID().equals(BigInteger.valueOf(listId))) {
+				return channel;
+			}
+		}
+		throw new ChannelNotFoundException();
+	}
 
 	private ZNPERASGNDLTTYPE findZone(String zoneName) throws ZoneNotFoundException {
 		for (ZNPERASGNDLTTYPE zone : codeplug.getAPPPARTITION().getZNPERASGNDLHTYPEGRP().getZNPERASGNDLTTYPE()) {
@@ -1374,10 +1405,13 @@ public class Codeplug {
 		} catch (JAXBException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (ChannelNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
-	private void addChannelToRoamList(STSRCHDLTTYPE roamList, int channelId) {
+	private void addChannelToRoamList(STSRCHDLTTYPE roamList, int channelId) throws ChannelNotFoundException {
 
 		// Need to set the channel to an IP Site Connect channel
 		// TODO: This doesn't seem to be the correct entry!
@@ -1393,6 +1427,24 @@ public class Codeplug {
 			}
 		}
 		*/
+		
+		CNVPERCMPTYPE channel = findChannel(channelId);
+		
+		// Set the Channel scan/roam list
+		channel.getCPUTOSCANEN().setApplicable("Disabled");
+		channel.getCPMLTSTPSNLTIND().setValue(BigInteger.valueOf(1));
+		channel.getCPINTRPTMSGDLY().setApplicable("Enabled");
+		
+		channel.getCPSCANPERSLISTIT().setApplicable("NA");
+		channel.getCPSCANPERSLISTITTYPE().setValue("NONE");
+		channel.getCPSCANPERSLISTITID().setValue(BigInteger.valueOf(0));
+		
+		channel.getCPSCNROAMLISTIT().setValue(roamList.getListID());
+		channel.getCPSCNROAMLISTIT().setTypeID("ST_SRCH_DLH_TYPE");
+		
+		channel.getCPSTSRCHLSTITTYPE().setValue("ST_SRCH_DLH_TYPE");
+		channel.getCPSTSRCHLSTITID().setValue(roamList.getListID());
+		
 		
 		// The listLetID seems to be unique to the scan list entry, across all scan
 		// lists (and issued sequentially)
@@ -1565,11 +1617,14 @@ public class Codeplug {
 		} catch (JAXBException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (ChannelNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
 	}
 
-	private void addChannelToScanList(SCANPERDLTTYPE scanList, int channelId) {
+	private void addChannelToScanList(SCANPERDLTTYPE scanList, int channelId) throws ChannelNotFoundException {
 
 		// The listLetID seems to be unique to the scan list entry, across all scan
 		// lists (and issued sequentially)
@@ -1639,6 +1694,15 @@ public class Codeplug {
 		scanListEntry.setSPLRESERVED(splReserved);
 
 		scanList.getSCANPERDLLTYPE().add(scanListEntry);
+		
+		CNVPERCMPTYPE channel = findChannel(channelId);
+		
+		// Set the Channel scan/roam list
+		channel.getCPSCANPERSLISTIT().setApplicable("NA");
+		channel.getCPSCANPERSLISTITTYPE().setValue("SCAN_PER_DLH_TYPE");
+		channel.getCPSCANPERSLISTITID().setValue(scanList.getListID());
+		channel.getCPSCNROAMLISTIT().setValue(scanList.getListID());
+		channel.getCPSCNROAMLISTIT().setTypeID("SCAN_PER_DLH_TYPE");
 
 	}
 
@@ -1750,18 +1814,23 @@ public class Codeplug {
 	
 	/**
 	 * Generate a Base64-encoded boot image
+	 * @throws IOException 
 	 */
 	public String bootImage(String version) {
-        BufferedImage img = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2d = img.createGraphics();
-        Font font = new Font("Arial", Font.PLAIN, 48);
+        BufferedImage img = null;
+        
+        try {
+			img = ImageIO.read(new File(getClass().getClassLoader().getResource("logo.png").getFile()));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        
+		Graphics2D g2d = img.createGraphics();
+        Font font = new Font(version, Font.PLAIN, 10);
         g2d.setFont(font);
         FontMetrics fm = g2d.getFontMetrics();
-        int width = fm.stringWidth(version);
-        int height = fm.getHeight();
-        g2d.dispose();
 
-        img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         g2d = img.createGraphics();
         g2d.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1777,7 +1846,8 @@ public class Codeplug {
         g2d.drawString(version, 0, fm.getAscent());
         g2d.dispose();
         try {
-            ImageIO.write(img, "png", new File("Text.png"));
+            ImageIO.write(img, "bmp", new File("utils\\boot.bmp"));
+            MotoTools.logger.info("Written out boot image");
         } catch (IOException ex) {
             ex.printStackTrace();
         }
