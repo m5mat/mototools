@@ -86,7 +86,6 @@ public class MotoTools {
 		filters.put("South-Region", southFilter);
 		filters.put("South-West-Region", southWestFilter);
 		filters.put("South-East-Region", southEastFilter);
-		
 
 		// Load up radio profiles
 		profiles.put(2344327, new DP4800UHF());
