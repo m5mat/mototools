@@ -118,19 +118,9 @@ public class MotoTools {
 
 				Filter filter = filters.get(filterID);
 				
-				// codeplug = populateTestConfig(codeplug);
 				codeplug = addSimplexChannels(codeplug); // Checked - OK
 				
-				// Bodge in Malvern
-				codeplug.addDigitalRepeater("GB7BJ Mal Phoenix", // Repeater Name (Used for zone name)
-						439.7375, // Repeater output frequency (device receive frequency)
-						430.7375, // Repeater input frequency (device transmit frequency)
-						13, // DMR Colour code
-						new PhoenixUK(radioProfile), // Connectivity
-						true // Add channels to scan list?
-				);
-				
-				codeplug = populateCodeplugFromUKRepeaters(codeplug, filter); // Checked - Error
+				codeplug = populateCodeplugFromUKRepeaters(codeplug, filter); // Checked - OK
 //				codeplug = addReflectors(codeplug); // Checked - OK (but uses a lot of contact slots!)
 				codeplug = addContactsFromLastHeard(codeplug); // Checked - OK
 	
@@ -147,55 +137,6 @@ public class MotoTools {
 				new File("utils\\codeplugs"));
 
 		logger.info("Done");
-	}
-
-	public static Codeplug populateTestConfig(Codeplug codeplug) throws Exception {
-		// Add repeaters before contacts as some group contacts will need to be created
-		// and we don't want to risk having no contact slots available
-
-		logger.info("Adding digital repeaters");
-		// Add a digital Repeater
-		
-		codeplug.addDigitalRepeater("GB7CC Cleeve", // Repeater Name (Used for zone name)
-				430.2750, // Repeater output frequency (device receive frequency)
-				439.2750, // Repeater input frequency (device transmit frequency)
-				2, // DMR Colour code
-				new Salop(radioProfile), // Connectivity
-				true // Add channels to scan list?
-		);
-/*
-		codeplug.addDigitalRepeater("GB7KM Swindon", // Repeater Name (Used for zone name)
-				439.6625, // Repeater output frequency (device receive frequency)
-				430.6625, // Repeater input frequency (device transmit frequency)
-				3, // DMR Colour code
-				new PhoenixUK(radioProfile), // Connectivity
-				true // Add channels to scan list?
-		);
-*/		
-
-		logger.info("Adding analogue repeaters");
-		// Add an analogue Repeater
-		codeplug.addAnalogueRepeater("SW", // Zone Name
-				"GB3UK", // Repeater name (used for zone name)
-				430.8625, // Repeater output frequency (device receive frequency)
-				438.4625, // Repeater input frequency (device transmit frequency)
-				new Tone(103.5), // CTCSS Tone Frequency
-				true // Add to scan list?
-		);
-
-		codeplug.addAnalogueRepeater("SW", // Zone Name
-				"GB3GH", // Repeater name (used for zone name)
-				433.1250, // Repeater output frequency (device receive frequency)
-				434.7250, // Repeater input frequency (device transmit frequency)
-				new Tone(103.5), // CTCSS Tone Frequency
-				true // Add to scan list?
-		);
-
-		logger.info("Adding contacts");
-		codeplug.addContact(123456, "2E1HNK Matt", true);
-		codeplug.addContact(12345, "G3MXH Terry", true);
-
-		return codeplug;
 	}
 
 	public static Codeplug populateCodeplugFromUKRepeaters(Codeplug codeplug, Filter filter)
