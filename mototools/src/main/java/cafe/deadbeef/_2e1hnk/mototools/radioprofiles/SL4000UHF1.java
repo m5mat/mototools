@@ -46,4 +46,16 @@ public class SL4000UHF1 extends RadioProfile {
 		// TODO Auto-generated method stub
 		return 1000;
 	}
+
+	@Override
+	public int getMaxChannelsPerScanList() {
+		// TODO Auto-generated method stub
+		return 16;
+	}
+
+	@Override
+	public int[] getBootLogoSize() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

@@ -1,5 +1,6 @@
 package cafe.deadbeef._2e1hnk.mototools;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 
 import java.io.FileNotFoundException;
@@ -10,8 +11,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 
 import javax.xml.bind.JAXBContext;
@@ -1813,24 +1816,48 @@ public class Codeplug {
 	}
 	
 	/**
+	 * Set the boot image
+	 */
+	public void setBootImage(String line1, String line2, String line3) {
+		byte[] base64BootImage = this.bootImage(line1, line2, line3);
+		Data bootImage = codeplug.getFILEDATA().getData();
+		bootImage.setValue(base64BootImage);
+		codeplug.getFILEDATA().setData(bootImage);
+	}
+	
+	/**
 	 * Generate a Base64-encoded boot image
 	 * @throws IOException 
 	 */
-	public String bootImage(String version) {
+	public byte[] bootImage(String line1, String line2, String line3) {
+		int borderWidth = 2;
+		int annotationTextSize = 6;
+		Color annotationTextColor = Color.RED;
+		
         BufferedImage img = null;
+        final ByteArrayOutputStream os = new ByteArrayOutputStream();
         
         try {
-			img = ImageIO.read(new File(getClass().getClassLoader().getResource("logo.png").getFile()));
+			img = ImageIO.read(new File(getClass().getClassLoader().getResource("dmr-logo-black.bmp").getFile()));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
         
+        /*
+         * use this to convert from a non-RGB image (e.g. an RGBA PNG file) to an RGB BMP file, if necessary
+         */
+        // BufferedImage newImg = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_RGB);
+        // newImg.createGraphics().drawImage(img, 0, 0, Color.WHITE, null);
+        // img = newImg;
+        
 		Graphics2D g2d = img.createGraphics();
-        Font font = new Font(version, Font.PLAIN, 10);
+        Font font = new Font("courier", Font.PLAIN, annotationTextSize);
         g2d.setFont(font);
         FontMetrics fm = g2d.getFontMetrics();
-
+        // g2d.setColor(Color.BLACK);
+        g2d.setColor(annotationTextColor);
+        
         g2d = img.createGraphics();
         g2d.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -1840,15 +1867,42 @@ public class Codeplug {
         g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
         g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
-        g2d.setFont(font);
+        
+        
+        // For calculating text position
         fm = g2d.getFontMetrics();
-        g2d.setColor(Color.BLACK);
-        g2d.drawString(version, 0, fm.getAscent());
+        int lineHeight = fm.getAscent();
+        int line1Width = fm.stringWidth(line1);
+        int line2Width = fm.stringWidth(line2);
+        int line3Width = fm.stringWidth(line3);
+        
+        // Top-left aligned
+        /*
+        g2d.drawString(line1, borderWidth, fm.getAscent() + borderWidth);
+        g2d.drawString(line2, borderWidth, fm.getAscent()*2 + borderWidth);
+        g2d.drawString(line3, borderWidth, fm.getAscent()*3 + borderWidth);
+        */
+        // Bottom-right aligned
+        g2d.drawString(line1, img.getWidth() - line1Width - borderWidth, img.getHeight() - (lineHeight*2) - borderWidth);
+        g2d.drawString(line2, img.getWidth() - line2Width - borderWidth, img.getHeight() - (lineHeight*1) - borderWidth);
+        g2d.drawString(line3, img.getWidth() - line3Width - borderWidth, img.getHeight() - (lineHeight*0) - borderWidth);
+        
         g2d.dispose();
+        
+        // Set the color depth
+        BufferedImage newImg = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_BYTE_INDEXED);
+        newImg.createGraphics().drawImage(img, 0, 0, null);
+        img = newImg;
+        
+        
         try {
-            ImageIO.write(img, "bmp", new File("utils\\boot.bmp"));
-            MotoTools.logger.info("Written out boot image");
-        } catch (IOException ex) {
+            ImageIO.write(img, "BMP", new File(String.format("utils/boot-%s.bmp", line3)));
+            if ( !ImageIO.write(img,  "BMP", os) ) {
+            	throw new Exception("No suitable encoder found for ImageIO.write()");
+            }
+            MotoTools.logger.info("Generated boot image");
+            return os.toByteArray();
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
 		return null;

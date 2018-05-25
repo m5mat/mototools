@@ -4,9 +4,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -18,12 +20,14 @@ import java.util.regex.Pattern;
 import javax.xml.bind.JAXBException;
 
 import org.apache.log4j.Logger;
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import cafe.deadbeef._2e1hnk.mototools.exceptions.ContactListFullException;
+import cafe.deadbeef._2e1hnk.mototools.exceptions.KMeansException;
 import cafe.deadbeef._2e1hnk.mototools.exceptions.RadioIdOutOfRangeException;
 import cafe.deadbeef._2e1hnk.mototools.network.*;
 import cafe.deadbeef._2e1hnk.mototools.radioprofiles.*;
@@ -37,13 +41,13 @@ public class MotoTools {
 	private static String ukLastHeardUrl = "http://www.opendmr.net/uk_lastusers_nodate.php?limit=1000";
 
 	public static void main(String[] args) throws Exception {
-
-		// Create region filters
 		
+		// Create region filters
+
 		// Dummy region
 		Filter dummyFilter = new Filter();
 		dummyFilter.addToFilterKey("region", "dummy");
-		
+
 		// Exclude southern regions to create a codeplug for use in the north
 		Filter northFilter = new Filter();
 		northFilter.addToFilterKey("region", "SW");
@@ -64,21 +68,23 @@ public class MotoTools {
 		southFilter.addToFilterKey("region", "SCO");
 		southFilter.addToFilterKey("region", "NI");
 		southFilter.addToFilterKey("region", "NOR");
-		
-		// Exclude northern and south-eastern regions to create a codeplug for use in the south west
+
+		// Exclude northern and south-eastern regions to create a codeplug for use in
+		// the south west
 		Filter southWestFilter = new Filter();
 		southWestFilter.addToFilterKey("region", "SCO");
 		southWestFilter.addToFilterKey("region", "NI");
 		southWestFilter.addToFilterKey("region", "NOR");
 		southWestFilter.addToFilterKey("region", "SE");
-		
-		// Exclude northern and welsh regions to create a codeplug for use in the south-east
+
+		// Exclude northern and welsh regions to create a codeplug for use in the
+		// south-east
 		Filter southEastFilter = new Filter();
 		southEastFilter.addToFilterKey("region", "SCO");
 		southEastFilter.addToFilterKey("region", "NI");
 		southEastFilter.addToFilterKey("region", "NOR");
 		southEastFilter.addToFilterKey("region", "WM");
-		
+
 		Map<String, Filter> filters = new HashMap<String, Filter>();
 		// filters.put("Dummy-Region", dummyFilter);
 		filters.put("North-Region", northFilter);
@@ -89,7 +95,7 @@ public class MotoTools {
 
 		// Load up radio profiles
 		profiles.put(2344327, new DP4800UHF());
-		// profiles.put(1, new DM4400UHF1());
+		profiles.put(2341514, new DP4800UHF());
 		// profiles.put(2, new DM4400VHF());
 		// profiles.put(3, new DM4600UHF1());
 		// profiles.put(4, new DM4600VHF());
@@ -106,24 +112,26 @@ public class MotoTools {
 			logger.info("Using radio profile " + candidateRadioProfile.getClass().getSimpleName());
 			radioProfile = candidateRadioProfile;
 
-			for ( String filterID : filters.keySet() ) {
+			for (String filterID : filters.keySet()) {
 				logger.info("Loading codeplug template");
 				Codeplug codeplug = new Codeplug("utils/codeplugs/DP4800-template-3.xml", radioProfile);
 
-				codeplug.bootImage("test");
-				
+				logger.info("Generating radio boot image");
+				codeplug.setBootImage("", radioId.toString(), filterID);
+
 				// Set radio ID
 				logger.info("Setting Radio ID " + radioId);
 				codeplug.setRadioId(radioId);
 
 				Filter filter = filters.get(filterID);
-				
+
 				codeplug = addSimplexChannels(codeplug); // Checked - OK
-				
+
 				codeplug = populateCodeplugFromUKRepeaters(codeplug, filter); // Checked - OK
-//				codeplug = addReflectors(codeplug); // Checked - OK (but uses a lot of contact slots!)
+				// codeplug = addReflectors(codeplug); // Checked - OK (but uses a lot of
+				// contact slots!)
 				codeplug = addContactsFromLastHeard(codeplug); // Checked - OK
-	
+
 				String outputFileName = String.format("utils/codeplugs/MotoTools-%s-ID%d-%s.xml",
 						candidateRadioProfile.getClass().getSimpleName(), radioId, filterID);
 				logger.info("Writing out codeplug XML to " + outputFileName);
@@ -135,12 +143,16 @@ public class MotoTools {
 
 		Runtime.getRuntime().exec("cmd /c start \"Signing Codeplugs...\" sign-codeplug.bat", null,
 				new File("utils\\codeplugs"));
-
+		
 		logger.info("Done");
 	}
 
 	public static Codeplug populateCodeplugFromUKRepeaters(Codeplug codeplug, Filter filter)
 			throws IOException, ParseException, NumberFormatException, JAXBException {
+
+		KMeans kmeans = new KMeans();
+		
+		Map<String, List<Repeater>> analogueRepeaters = new HashMap<String, List<Repeater>>();
 
 		Document doc = Jsoup.connect("https://www.ukrepeater.net/repeaterlist1.htm").get();
 
@@ -149,6 +161,7 @@ public class MotoTools {
 		int i = 0;
 
 		for (Element repeaterElement : repeaterLines) {
+
 			if (i > 0) {
 				try {
 					Elements repeaterDetails = repeaterElement.children();
@@ -169,8 +182,7 @@ public class MotoTools {
 								+ " due to region filter (" + repeaterDetails.get(10).text() + ")");
 						continue;
 					}
-					
-					
+
 					String[] rawModes = repeaterDetails.get(4).text().split("/");
 					Set<String> modes = new HashSet<String>();
 
@@ -179,98 +191,134 @@ public class MotoTools {
 					}
 
 					// Get Extended Info
-					Document repeaterDoc = Jsoup.connect(repeaterDetails.get(0).selectFirst("a").attr("href")).get();
-					String textfield = repeaterDoc.selectFirst("div#body table tbody tr td").text();
+					for (int attempt = 1; attempt <= 5; attempt++) {
+						String url = repeaterDetails.get(0).selectFirst("a").attr("href");
+						try {
+							Connection.Response response = Jsoup.connect(url).timeout(10000).execute();
+							if (response.statusCode() != 200) {
+								logger.error(String.format("Error %d fetching %s", response.statusCode(), url));
+							} else {
+								Document repeaterDoc = response.parse();
 
-					String regex = "NoV holder: ([a-zA-Z\\ \\-].*?) \\[.*Band: (\\w*) .* Database Entry: ([0-9a-zA-Z\\ ].*?) Date of NoV Issue: ([0-9a-zA-Z\\ ].*?) Renewal Date: ([0-9a-zA-Z\\ ].*)";
+								String textfield = repeaterDoc.selectFirst("div#body table tbody tr td").text();
 
-					Pattern pattern = Pattern.compile(regex);
+								String regex = "NoV holder: ([a-zA-Z\\ \\-].*?) \\[.*Band: (\\w*) .* Database Entry: ([0-9a-zA-Z\\ ].*?) Date of NoV Issue: ([0-9a-zA-Z\\ ].*?) Renewal Date: ([0-9a-zA-Z\\ ].*)";
 
-					Matcher matcher = pattern.matcher(textfield);
+								Pattern pattern = Pattern.compile(regex);
 
-					String repeaterCallsignLocation = repeaterDetails.get(0).text() + " "
-							+ MotoTools.titleCase(repeaterDetails.get(8).text());
+								Matcher matcher = pattern.matcher(textfield);
 
-					// Get DMR-specific fields
-					if (modes.contains("DMR")) {
-						logger.debug("Processing DMR");
-						String dmr_regex = "cc:(\\d+) Connectivity: ([0-9A-Z\\ ].+?)\\s{1,}(?:ETCC|This|DMR)";
+								String repeaterCallsignLocation = repeaterDetails.get(0).text() + " "
+										+ MotoTools.titleCase(repeaterDetails.get(8).text());
 
-						Pattern dmr_pattern = Pattern.compile(dmr_regex);
+								// Get DMR-specific fields
+								if (modes.contains("DMR")) {
+									logger.debug("Processing DMR");
+									String dmr_regex = "cc:(\\d+) Connectivity: ([0-9A-Z\\ ].+?)\\s{1,}(?:ETCC|This|DMR)";
 
-						Matcher dmr_matcher = dmr_pattern.matcher(textfield);
+									Pattern dmr_pattern = Pattern.compile(dmr_regex);
 
-						logger.debug("DMR, found " + dmr_matcher.groupCount() + " matches");
+									Matcher dmr_matcher = dmr_pattern.matcher(textfield);
 
-						if (dmr_matcher.find()) {
-							AbstractNetwork network = new Standalone(radioProfile);
+									logger.debug("DMR, found " + dmr_matcher.groupCount() + " matches");
 
-							switch (dmr_matcher.group(2)) {
-							case "BRANDMEISTER":
-								network = new Brandmeister(radioProfile);
-								break;
-							case "PHOENIX UK":
-								network = new PhoenixUK(radioProfile);
-								break;
-							case "SW CLUSTER":
-								network = new SWCluster(radioProfile);
-								break;
-							case "SALOP":
-								network = new Salop(radioProfile);
-								break;
-							case "NORTHERN":
-								network = new Northern(radioProfile);
-								break;
-							default:
-								logger.error("Repeater network not identified, using Standalone mode. Network was '"
-										+ dmr_matcher.group(2) + "'");
+									if (dmr_matcher.find()) {
+										AbstractNetwork network = new Standalone(radioProfile);
+
+										switch (dmr_matcher.group(2)) {
+										case "BRANDMEISTER":
+											network = new Brandmeister(radioProfile);
+											break;
+										case "PHOENIX UK":
+											network = new PhoenixUK(radioProfile);
+											break;
+										case "SW CLUSTER":
+											network = new SWCluster(radioProfile);
+											break;
+										case "SALOP":
+											network = new Salop(radioProfile);
+											break;
+										case "NORTHERN":
+											network = new Northern(radioProfile);
+											break;
+										default:
+											logger.error(
+													"Repeater network not identified, using Standalone mode. Network was '"
+															+ dmr_matcher.group(2) + "'");
+											break;
+										}
+
+										// Add digital Repeater
+
+										codeplug.addDigitalRepeater(repeaterCallsignLocation, // Repeater Name (Used for
+																								// zone name)
+												Double.parseDouble(repeaterDetails.get(2).text()), // Repeater output
+																									// frequency
+																									// (device
+																									// receive
+																									// frequency)
+												Double.parseDouble(repeaterDetails.get(3).text()), // Repeater input
+																									// frequency
+																									// (device
+																									// transmit
+																									// frequency)
+												Integer.parseInt(dmr_matcher.group(1)), // DMR Colour code
+												network, // Connectivity
+												true // Add channels to scan list?
+										);
+									}
+								} else if (modes.contains("AV") || modes.contains("ANL")) {
+									// Add analogue Repeater
+									String tone = null;
+									Double toneFreq = null;
+
+									if (repeaterDetails.get(11).text().length() > 2) {
+										tone = repeaterDetails.get(11).text().substring(0,
+												(repeaterDetails.get(11).text().length() - 2));
+									} else {
+										tone = repeaterDetails.get(11).text();
+									}
+
+									try {
+										toneFreq = Double.parseDouble(tone);
+									} catch (Exception e) {
+										logger.error(
+												"tone couldn't be parsed, defaulting to 123Hz but this is probably wrong!",
+												e);
+										toneFreq = 123.0;
+									}
+
+									Repeater repeater = new Repeater(repeaterDetails.get(10).text(),
+											repeaterCallsignLocation, Double.parseDouble(repeaterDetails.get(2).text()),
+											Double.parseDouble(repeaterDetails.get(3).text()), new Tone(toneFreq), true,
+											new LatLng(Double.parseDouble(repeaterDetails.get(14).text()),
+													Double.parseDouble(repeaterDetails.get(15).text())));
+
+									if (!analogueRepeaters.keySet().contains(repeaterDetails.get(10).text())) {
+										analogueRepeaters.put(repeaterDetails.get(10).text(),
+												new ArrayList<Repeater>());
+									}
+
+									List<Repeater> repeaters = analogueRepeaters.get(repeaterDetails.get(10).text());
+									repeaters.add(repeater);
+									analogueRepeaters.put(repeaterDetails.get(10).text(), repeaters);
+									kmeans.add(repeaterCallsignLocation, new LatLng(Double.parseDouble(repeaterDetails.get(14).text()), Double.parseDouble(repeaterDetails.get(15).text())));										
+								}
 								break;
 							}
-
-							// Add digital Repeater
-							
-							codeplug.addDigitalRepeater(repeaterCallsignLocation, // Repeater Name (Used for zone name)
-									Double.parseDouble(repeaterDetails.get(2).text()), // Repeater output frequency
-																						// (device
-																						// receive frequency)
-									Double.parseDouble(repeaterDetails.get(3).text()), // Repeater input frequency
-																						// (device
-																						// transmit frequency)
-									Integer.parseInt(dmr_matcher.group(1)), // DMR Colour code
-									network, // Connectivity
-									true // Add channels to scan list?
-							);
-							
-						}
-					} else if (modes.contains("AV") || modes.contains("ANL")) {
-						// Add analogue Repeater
-						String tone = null;
-						Double toneFreq = null;
-
-						if (repeaterDetails.get(11).text().length() > 2) {
-							tone = repeaterDetails.get(11).text().substring(0,
-									(repeaterDetails.get(11).text().length() - 2));
-						} else {
-							tone = repeaterDetails.get(11).text();
+						} catch (SocketTimeoutException e) {
+							logger.error(String.format("Connection to %s timed out on attempt %d", url, attempt));
 						}
 
-						try {
-							toneFreq = Double.parseDouble(tone);
-						} catch (Exception e) {
-							logger.error("tone couldn't be parsed, defaulting to 123Hz but this is probably wrong!", e);
-							toneFreq = 123.0;
-						}
-
-						codeplug.addAnalogueRepeater(repeaterDetails.get(10).text(), // Zone Name
-								repeaterCallsignLocation, // Repeater name (used for channel name)
-								Double.parseDouble(repeaterDetails.get(2).text()), // Repeater output frequency (device
-																					// receive frequency)
-								Double.parseDouble(repeaterDetails.get(3).text()), // Repeater input frequency (device
-																					// transmit frequency)
-								new Tone(toneFreq), // CTCSS Tone Frequency
-								true // Add to scan list?
-						);
-
+						/*
+						 * codeplug.addAnalogueRepeater(repeaterDetails.get(10).text(), // Zone Name
+						 * repeaterCallsignLocation, // Repeater name (used for channel name)
+						 * Double.parseDouble(repeaterDetails.get(2).text()), // Repeater output
+						 * frequency (device // receive frequency)
+						 * Double.parseDouble(repeaterDetails.get(3).text()), // Repeater input
+						 * frequency (device // transmit frequency) new Tone(toneFreq), // CTCSS Tone
+						 * Frequency true // Add to scan list? );
+						 */
 					}
 				} catch (IllegalStateException e) {
 					logger.error("Error adding repeater", e);
@@ -278,6 +326,34 @@ public class MotoTools {
 			}
 			i++;
 		}
+
+		for (String zone : analogueRepeaters.keySet()) {
+			List<Repeater> repeaters = analogueRepeaters.get(zone);
+
+			Collections.sort(repeaters, new LocationComparator());
+
+			int count = 0;
+			for (Repeater repeater : analogueRepeaters.get(zone)) {
+				int set = Math.round(count / radioProfile.getMaxChannelsPerScanList());
+				codeplug.addAnalogueRepeater(zone + "-" + set, // Zone Name
+						repeater.name, // Repeater name (used for channel name)
+						repeater.output, // Repeater output frequency (device receive frequency)
+						repeater.input, // Repeater input frequency (device transmit frequency)
+						repeater.tone, // CTCSS Tone Frequency
+						repeater.addToScanList // Add to scan list?
+				);
+				count++;
+			}
+		}
+		
+		try {
+			Map<Integer, ArrayList<KMeansPoint>> clusters = kmeans.run(5);
+			KMeansChart chart = new KMeansChart();
+			chart.chart(clusters, String.format("utils/map-%s.png", filter.toString()));
+		} catch (KMeansException e) {
+			e.printStackTrace();
+		}
+		
 		return codeplug;
 	}
 

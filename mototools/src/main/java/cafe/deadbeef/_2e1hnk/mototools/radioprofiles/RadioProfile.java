@@ -7,6 +7,7 @@ public abstract class RadioProfile {
 	public static int MAX_CONTACT_NAME_LENGTH = 16;
 	public static int MAX_CHANNEL_NAME_LENGTH = 16;
 	public static int MAX_ZONE_NAME_LENGTH = 16;
+	public static int MAX_CHANNELS_PER_SCAN_LIST = 16;
 	
 	public abstract int getMinFrequencyMhz();
 	public abstract int getMaxFrequencyMhz();
@@ -16,5 +17,6 @@ public abstract class RadioProfile {
 	public abstract int getMaxContactNameLength();
 	public abstract int getMaxZoneNameLength();
 	public abstract int getMaxChannels();
-	
+	public abstract int getMaxChannelsPerScanList();
+	public abstract int[] getBootLogoSize();
 }

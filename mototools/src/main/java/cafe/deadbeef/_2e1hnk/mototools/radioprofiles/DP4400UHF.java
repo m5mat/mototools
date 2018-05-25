@@ -46,4 +46,16 @@ public class DP4400UHF extends RadioProfile {
 		// TODO Auto-generated method stub
 		return 32;
 	}
+
+	@Override
+	public int getMaxChannelsPerScanList() {
+		// TODO Auto-generated method stub
+		return 16;
+	}
+
+	@Override
+	public int[] getBootLogoSize() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
