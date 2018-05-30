@@ -10,6 +10,7 @@ import cafe.deadbeef._2e1hnk.mototools.exceptions.KMeansException;
 
 public class KMeans {
 	private Map<String, LatLng> points = new HashMap<String, LatLng>();
+	private static final int MAX_CLUSTER_SIZE = 16;
 
 	public KMeans() {
 
@@ -76,13 +77,39 @@ public class KMeans {
 				if (minDist == 10000 && closestPoint == 0) {
 					throw new KMeansException();
 				} else {
-					// Add point to correct cluster
 					ArrayList<KMeansPoint> cluster = new ArrayList<KMeansPoint>();
-					if ( candidateClusters.get(closestPoint) != null ) {
+					if (candidateClusters.get(closestPoint) != null) {
 						cluster = candidateClusters.get(closestPoint);
 					}
-					cluster.add(new KMeansPoint(pointName, point.lat, point.lng));
-					candidateClusters.put(closestPoint, cluster);
+
+					if (cluster.size() < MAX_CLUSTER_SIZE) {
+						// Add point to correct cluster
+						cluster.add(new KMeansPoint(pointName, point.lat, point.lng));
+						candidateClusters.put(closestPoint, cluster);
+					} else {
+						MotoTools.logger.debug("Cluster full");
+						// Work out if this is a better fit for the cluster than any other existing
+						// member of the cluster
+						double furthestMemberDist = 0;
+						KMeansPoint furthestPoint = null;
+						for (KMeansPoint testPoint : cluster) {
+							if (furthestMemberDist > origins.get(closestPoint).getDistance(testPoint)) {
+								furthestMemberDist = origins.get(closestPoint).getDistance(testPoint);
+								furthestPoint = testPoint;
+							}
+						}
+
+						// furthestPoint now holds the most distant point from the cluster origin and
+						// furthestMemberDist is the distance from the origin
+						if ( furthestMemberDist > minDist ) {
+							// this point needs to be a member of the cluster
+							cluster.remove(furthestPoint);
+							cluster.add(new KMeansPoint(pointName, point.lat, point.lng));
+							// need to find a place for furthestPoint
+						} else {
+							// this point needs to be a member of it's second-best cluster
+						}
+					}
 				}
 			}
 
@@ -104,11 +131,16 @@ public class KMeans {
 				double meanLng = lngSum / members;
 				origins.put(clusterId, new LatLng(meanLat, meanLng));
 			}
-			
-			// todo: Check if candidateClusters and clusters are the same, if so exit, otherwise iterate again
+
+			// todo: Check if candidateClusters and clusters are the same, if so exit,
+			// otherwise iterate again
 			clusters = candidateClusters;
 		}
 		return clusters;
+	}
+	
+	private void findBestCluster(LatLng point) {
+		
 	}
 
 	private String clusterStatus(ArrayList<KMeansPoint> cluster) {

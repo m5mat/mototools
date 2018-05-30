@@ -38,18 +38,20 @@ public class MotoTools {
 	private static RadioProfile radioProfile;
 	private static Map<Integer, RadioProfile> profiles = new HashMap<Integer, RadioProfile>();
 
+	private static List<MotoToolsJob> jobs = new ArrayList<MotoToolsJob>();
+
 	private static String ukLastHeardUrl = "http://www.opendmr.net/uk_lastusers_nodate.php?limit=1000";
 
 	public static void main(String[] args) throws Exception {
-		
+
 		// Create region filters
 
 		// Dummy region
-		Filter dummyFilter = new Filter();
+		Filter dummyFilter = new Filter("Dummy");
 		dummyFilter.addToFilterKey("region", "dummy");
 
 		// Exclude southern regions to create a codeplug for use in the north
-		Filter northFilter = new Filter();
+		Filter northFilter = new Filter("North Region");
 		northFilter.addToFilterKey("region", "SW");
 		northFilter.addToFilterKey("region", "SE");
 		northFilter.addToFilterKey("region", "MID");
@@ -57,41 +59,34 @@ public class MotoTools {
 
 		// Exclude extreme southern and northern regions to create a codeplug for use in
 		// central UK
-		Filter centralFilter = new Filter();
+		Filter centralFilter = new Filter("Central Region");
 		centralFilter.addToFilterKey("region", "SCO");
 		centralFilter.addToFilterKey("region", "NI");
 		centralFilter.addToFilterKey("region", "SW");
 		centralFilter.addToFilterKey("region", "SE");
 
 		// Exclude northern regions to create a codeplug for use in the south
-		Filter southFilter = new Filter();
+		Filter southFilter = new Filter("South Region");
 		southFilter.addToFilterKey("region", "SCO");
 		southFilter.addToFilterKey("region", "NI");
 		southFilter.addToFilterKey("region", "NOR");
 
 		// Exclude northern and south-eastern regions to create a codeplug for use in
 		// the south west
-		Filter southWestFilter = new Filter();
+		Filter southWestFilter = new Filter("South-West Region");
 		southWestFilter.addToFilterKey("region", "SCO");
 		southWestFilter.addToFilterKey("region", "NI");
 		southWestFilter.addToFilterKey("region", "NOR");
 		southWestFilter.addToFilterKey("region", "SE");
+		southWestFilter.addToFilterKey("region", "MID");
 
 		// Exclude northern and welsh regions to create a codeplug for use in the
 		// south-east
-		Filter southEastFilter = new Filter();
+		Filter southEastFilter = new Filter("South-East Region");
 		southEastFilter.addToFilterKey("region", "SCO");
 		southEastFilter.addToFilterKey("region", "NI");
 		southEastFilter.addToFilterKey("region", "NOR");
 		southEastFilter.addToFilterKey("region", "WM");
-
-		Map<String, Filter> filters = new HashMap<String, Filter>();
-		// filters.put("Dummy-Region", dummyFilter);
-		filters.put("North-Region", northFilter);
-		filters.put("Central-Region", centralFilter);
-		filters.put("South-Region", southFilter);
-		filters.put("South-West-Region", southWestFilter);
-		filters.put("South-East-Region", southEastFilter);
 
 		// Load up radio profiles
 		profiles.put(2344327, new DP4800UHF());
@@ -105,45 +100,48 @@ public class MotoTools {
 		// profiles.put(8, new DP4800VHF());
 		// profiles.put(9, new SL4000UHF1());
 
-		for (Integer radioId : profiles.keySet()) {
+		// Load up job list
+		jobs.add(new MotoToolsJob(2344327, new DP4800UHF(), southWestFilter));
+		jobs.add(new MotoToolsJob(2341514, new DP4800UHF(), centralFilter));
+
+		for (MotoToolsJob job : jobs) {
+			Integer radioId = job.getRadioId();
 
 			RadioProfile candidateRadioProfile = profiles.get(radioId);
 
 			logger.info("Using radio profile " + candidateRadioProfile.getClass().getSimpleName());
 			radioProfile = candidateRadioProfile;
 
-			for (String filterID : filters.keySet()) {
-				logger.info("Loading codeplug template");
-				Codeplug codeplug = new Codeplug("utils/codeplugs/DP4800-template-3.xml", radioProfile);
+			logger.info("Loading codeplug template");
+			Codeplug codeplug = new Codeplug("utils/codeplugs/DP4800-template.xml", radioProfile);
 
-				logger.info("Generating radio boot image");
-				codeplug.setBootImage("", radioId.toString(), filterID);
+			logger.info("Generating radio boot image");
+			codeplug.setBootImage("", "DMR ID: " + radioId.toString(), job.getFilter().getFilterName());
 
-				// Set radio ID
-				logger.info("Setting Radio ID " + radioId);
-				codeplug.setRadioId(radioId);
+			// Set radio ID
+			logger.info("Setting Radio ID " + radioId);
+			codeplug.setRadioId(radioId);
 
-				Filter filter = filters.get(filterID);
+			Filter filter = job.getFilter();
 
-				codeplug = addSimplexChannels(codeplug); // Checked - OK
+			codeplug = addSimplexChannels(codeplug); // Checked - OK
 
-				codeplug = populateCodeplugFromUKRepeaters(codeplug, filter); // Checked - OK
-				// codeplug = addReflectors(codeplug); // Checked - OK (but uses a lot of
-				// contact slots!)
-				codeplug = addContactsFromLastHeard(codeplug); // Checked - OK
+			codeplug = populateCodeplugFromUKRepeaters(codeplug, filter); // Checked - OK
+			// codeplug = addReflectors(codeplug); // Checked - OK (but uses a lot of
+			// contact slots!)
+			codeplug = addContactsFromLastHeard(codeplug); // Checked - OK
 
-				String outputFileName = String.format("utils/codeplugs/MotoTools-%s-ID%d-%s.xml",
-						candidateRadioProfile.getClass().getSimpleName(), radioId, filterID);
-				logger.info("Writing out codeplug XML to " + outputFileName);
-				codeplug.toXml(outputFileName);
-			}
+			String outputFileName = String.format("utils/codeplugs/MotoTools-%s-ID%d-%s.xml",
+					candidateRadioProfile.getClass().getSimpleName(), radioId, filter.getFilterName());
+			logger.info("Writing out codeplug XML to " + outputFileName);
+			codeplug.toXml(outputFileName);
 		}
 
 		logger.info("Signing codeplugs");
 
 		Runtime.getRuntime().exec("cmd /c start \"Signing Codeplugs...\" sign-codeplug.bat", null,
 				new File("utils\\codeplugs"));
-		
+
 		logger.info("Done");
 	}
 
@@ -151,7 +149,7 @@ public class MotoTools {
 			throws IOException, ParseException, NumberFormatException, JAXBException {
 
 		KMeans kmeans = new KMeans();
-		
+
 		Map<String, List<Repeater>> analogueRepeaters = new HashMap<String, List<Repeater>>();
 
 		Document doc = Jsoup.connect("https://www.ukrepeater.net/repeaterlist1.htm").get();
@@ -302,7 +300,9 @@ public class MotoTools {
 									List<Repeater> repeaters = analogueRepeaters.get(repeaterDetails.get(10).text());
 									repeaters.add(repeater);
 									analogueRepeaters.put(repeaterDetails.get(10).text(), repeaters);
-									kmeans.add(repeaterCallsignLocation, new LatLng(Double.parseDouble(repeaterDetails.get(14).text()), Double.parseDouble(repeaterDetails.get(15).text())));										
+									kmeans.add(repeaterCallsignLocation,
+											new LatLng(Double.parseDouble(repeaterDetails.get(14).text()),
+													Double.parseDouble(repeaterDetails.get(15).text())));
 								}
 								break;
 							}
@@ -345,15 +345,15 @@ public class MotoTools {
 				count++;
 			}
 		}
-		
+
 		try {
 			Map<Integer, ArrayList<KMeansPoint>> clusters = kmeans.run(5);
 			KMeansChart chart = new KMeansChart();
-			chart.chart(clusters, String.format("utils/map-%s.png", filter.toString()));
+			chart.chart(clusters, String.format("utils/map-%s.png", filter.getFilterName()));
 		} catch (KMeansException e) {
 			e.printStackTrace();
 		}
-		
+
 		return codeplug;
 	}
 

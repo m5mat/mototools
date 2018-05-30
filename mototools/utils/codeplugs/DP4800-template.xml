@@ -21086,17 +21086,6 @@
       </ST_SRCH_DLT_TYPE>
     </ST_SRCH_DLH_TYPE_GRP>
     <RX_TG_LIST_DLH_TYPE_GRP SortType="None">
-      <RX_TG_LIST_DLT_TYPE Applicable="Enabled" ListID="28" SortType="None">
-        <RX_TG_LIST_DLH_TYPE Applicable="Enabled" ListID="28">
-          <RXTG_LSTCTG Applicable="Enabled" ListID="28">1</RXTG_LSTCTG>
-          <RXTG_LEDSZ Applicable="Enabled" ListID="28">4</RXTG_LEDSZ>
-          <RXTG_LEQMAX Applicable="Enabled" ListID="28">16</RXTG_LEQMAX>
-          <RXTG_LLEQMAX Applicable="Enabled" ListID="28">1</RXTG_LLEQMAX>
-          <RX_TG_LIST_DLH_TYPE_FTLLISHTYPE Applicable="Enabled" ListID="28">RX_TG_LIST_DLL_TYPE</RX_TG_LIST_DLH_TYPE_FTLLISHTYPE>
-          <RX_TG_LIST_DLH_TYPE_FTLLISHID Applicable="Enabled" ListID="28">28</RX_TG_LIST_DLH_TYPE_FTLLISHID>
-          <RXTG_RXTGLISTALIAS Applicable="Enabled" ListID="28">Manx Rptrs TG822</RXTG_RXTGLISTALIAS>
-        </RX_TG_LIST_DLH_TYPE>
-      </RX_TG_LIST_DLT_TYPE>
     </RX_TG_LIST_DLH_TYPE_GRP>
     <SCAN_PER_DLH_TYPE_GRP SortType="None">
       <SCAN_PER_DLT_TYPE Applicable="Enabled" ListID="52" SortType="None">

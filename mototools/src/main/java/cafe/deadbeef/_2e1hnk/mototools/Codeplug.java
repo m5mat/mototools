@@ -1831,7 +1831,7 @@ public class Codeplug {
 	 */
 	public byte[] bootImage(String line1, String line2, String line3) {
 		int borderWidth = 2;
-		int annotationTextSize = 6;
+		int annotationTextSize = 10;
 		Color annotationTextColor = Color.RED;
 		
         BufferedImage img = null;

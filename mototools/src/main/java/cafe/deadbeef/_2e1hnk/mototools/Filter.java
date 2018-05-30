@@ -8,6 +8,8 @@ import java.util.Map;
 public class Filter {
 	public static final boolean WHITELIST = true; // Only include entries that match this filter
 	public static final boolean BLACKLIST = false; // Only include entries the DON'T match this filter (default)
+	
+	private String filterName;
 
 	public boolean filterType = BLACKLIST;
 
@@ -26,6 +28,10 @@ public class Filter {
 	 */
 
 	private Map<String, List<String>> filter = new HashMap<String, List<String>>();
+
+	public Filter(String filterName) {
+		this.setFilterName(filterName);
+	}
 
 	/**
 	 * This method asks the question 'Should I include this item' - not necessarily
@@ -72,5 +78,13 @@ public class Filter {
 			filterContents.add(value);
 		}
 		this.filter.put(key, filterContents);
+	}
+
+	public String getFilterName() {
+		return filterName;
+	}
+
+	public void setFilterName(String filterName) {
+		this.filterName = filterName;
 	}
 }

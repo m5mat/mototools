@@ -96,7 +96,7 @@ public class KMeansChart {
 	// Note that the origin is at the upper left corner of the image, so the heights are inverted.
 	private Double latToY(int imageHeight, Double latitude, Double minLat, Double maxLat) {
 		// the 0.95 here is a fudge factor to correct for map projections
-		return (imageHeight - ( ( (latitude - minLat) / (maxLat-minLat) ) * imageHeight )) * 0.9;
+		return (imageHeight - ( ( (latitude - minLat) / (maxLat-minLat) ) * imageHeight * 0.95 ));
 	}
 	
 	private Double lngToX(int imageWidth, Double longitude, Double minLng, Double maxLng) {
