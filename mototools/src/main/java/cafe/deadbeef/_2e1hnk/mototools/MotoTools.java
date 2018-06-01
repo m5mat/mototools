@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Field;
+import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.text.ParseException;
@@ -26,11 +28,16 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import com.google.gson.Gson;
+
 import cafe.deadbeef._2e1hnk.mototools.exceptions.ContactListFullException;
 import cafe.deadbeef._2e1hnk.mototools.exceptions.KMeansException;
 import cafe.deadbeef._2e1hnk.mototools.exceptions.RadioIdOutOfRangeException;
 import cafe.deadbeef._2e1hnk.mototools.network.*;
 import cafe.deadbeef._2e1hnk.mototools.radioprofiles.*;
+import cafe.deadbeef.data.ConstrainedCluster;
+import cafe.deadbeef.data.Point;
+import cafe.deadbeef.data.ScatterChart;
 
 public class MotoTools {
 
@@ -56,7 +63,7 @@ public class MotoTools {
 		northFilter.addToFilterKey("region", "SE");
 		northFilter.addToFilterKey("region", "MID");
 		northFilter.addToFilterKey("region", "WM");
-
+		
 		// Exclude extreme southern and northern regions to create a codeplug for use in
 		// central UK
 		Filter centralFilter = new Filter("Central Region");
@@ -64,13 +71,14 @@ public class MotoTools {
 		centralFilter.addToFilterKey("region", "NI");
 		centralFilter.addToFilterKey("region", "SW");
 		centralFilter.addToFilterKey("region", "SE");
-
+		centralFilter.addToFilterKey("region", "NOR");
+		
 		// Exclude northern regions to create a codeplug for use in the south
 		Filter southFilter = new Filter("South Region");
 		southFilter.addToFilterKey("region", "SCO");
 		southFilter.addToFilterKey("region", "NI");
 		southFilter.addToFilterKey("region", "NOR");
-
+		
 		// Exclude northern and south-eastern regions to create a codeplug for use in
 		// the south west
 		Filter southWestFilter = new Filter("South-West Region");
@@ -79,7 +87,7 @@ public class MotoTools {
 		southWestFilter.addToFilterKey("region", "NOR");
 		southWestFilter.addToFilterKey("region", "SE");
 		southWestFilter.addToFilterKey("region", "MID");
-
+		
 		// Exclude northern and welsh regions to create a codeplug for use in the
 		// south-east
 		Filter southEastFilter = new Filter("South-East Region");
@@ -87,7 +95,7 @@ public class MotoTools {
 		southEastFilter.addToFilterKey("region", "NI");
 		southEastFilter.addToFilterKey("region", "NOR");
 		southEastFilter.addToFilterKey("region", "WM");
-
+		
 		// Load up radio profiles
 		profiles.put(2344327, new DP4800UHF());
 		profiles.put(2341514, new DP4800UHF());
@@ -102,7 +110,11 @@ public class MotoTools {
 
 		// Load up job list
 		jobs.add(new MotoToolsJob(2344327, new DP4800UHF(), southWestFilter));
-		jobs.add(new MotoToolsJob(2341514, new DP4800UHF(), centralFilter));
+		jobs.add(new MotoToolsJob(2344327, new DP4800UHF(), southEastFilter));
+		jobs.add(new MotoToolsJob(2344327, new DP4800UHF(), centralFilter));
+		jobs.add(new MotoToolsJob(2344327, new DP4800UHF(), southFilter));
+		jobs.add(new MotoToolsJob(2344327, new DP4800UHF(), northFilter));
+		// jobs.add(new MotoToolsJob(2341514, new DP4800UHF(), centralFilter));
 
 		for (MotoToolsJob job : jobs) {
 			Integer radioId = job.getRadioId();
@@ -146,11 +158,13 @@ public class MotoTools {
 	}
 
 	public static Codeplug populateCodeplugFromUKRepeaters(Codeplug codeplug, Filter filter)
-			throws IOException, ParseException, NumberFormatException, JAXBException {
+			throws Exception {
 
-		KMeans kmeans = new KMeans();
+		// Create a constrained cluster with 10 clusters and 16 members per cluster
+		ConstrainedCluster clusters = new ConstrainedCluster();
 
-		Map<String, List<Repeater>> analogueRepeaters = new HashMap<String, List<Repeater>>();
+		Map<String, AnalogueRepeater> analogueRepeaters = new HashMap<String, AnalogueRepeater>();
+		Map<String, DMRRepeater> dmrRepeaters = new HashMap<String, DMRRepeater>();
 
 		Document doc = Jsoup.connect("https://www.ukrepeater.net/repeaterlist1.htm").get();
 
@@ -248,6 +262,15 @@ public class MotoTools {
 
 										// Add digital Repeater
 
+										// This is so that we can add the repeater to the regional zone later (once the
+										// zones have been identified)
+										dmrRepeaters.put(repeaterCallsignLocation,
+												new DMRRepeater(repeaterCallsignLocation,
+														Double.parseDouble(repeaterDetails.get(2).text()),
+														Double.parseDouble(repeaterDetails.get(3).text()),
+														Integer.parseInt(dmr_matcher.group(1)), network, true));
+
+										// This is the individual Repeater's zone
 										codeplug.addDigitalRepeater(repeaterCallsignLocation, // Repeater Name (Used for
 																								// zone name)
 												Double.parseDouble(repeaterDetails.get(2).text()), // Repeater output
@@ -264,6 +287,9 @@ public class MotoTools {
 												network, // Connectivity
 												true // Add channels to scan list?
 										);
+										clusters.addPoint(new Point(repeaterCallsignLocation,
+												Double.parseDouble(repeaterDetails.get(14).text()),
+												Double.parseDouble(repeaterDetails.get(15).text())));
 									}
 								} else if (modes.contains("AV") || modes.contains("ANL")) {
 									// Add analogue Repeater
@@ -286,23 +312,17 @@ public class MotoTools {
 										toneFreq = 123.0;
 									}
 
-									Repeater repeater = new Repeater(repeaterDetails.get(10).text(),
-											repeaterCallsignLocation, Double.parseDouble(repeaterDetails.get(2).text()),
+									AnalogueRepeater repeater = new AnalogueRepeater(repeaterCallsignLocation,
+											Double.parseDouble(repeaterDetails.get(2).text()),
 											Double.parseDouble(repeaterDetails.get(3).text()), new Tone(toneFreq), true,
 											new LatLng(Double.parseDouble(repeaterDetails.get(14).text()),
 													Double.parseDouble(repeaterDetails.get(15).text())));
 
-									if (!analogueRepeaters.keySet().contains(repeaterDetails.get(10).text())) {
-										analogueRepeaters.put(repeaterDetails.get(10).text(),
-												new ArrayList<Repeater>());
-									}
+									analogueRepeaters.put(repeaterCallsignLocation, repeater);
 
-									List<Repeater> repeaters = analogueRepeaters.get(repeaterDetails.get(10).text());
-									repeaters.add(repeater);
-									analogueRepeaters.put(repeaterDetails.get(10).text(), repeaters);
-									kmeans.add(repeaterCallsignLocation,
-											new LatLng(Double.parseDouble(repeaterDetails.get(14).text()),
-													Double.parseDouble(repeaterDetails.get(15).text())));
+									clusters.addPoint(new Point(repeaterCallsignLocation,
+											Double.parseDouble(repeaterDetails.get(14).text()),
+											Double.parseDouble(repeaterDetails.get(15).text())));
 								}
 								break;
 							}
@@ -327,31 +347,112 @@ public class MotoTools {
 			i++;
 		}
 
-		for (String zone : analogueRepeaters.keySet()) {
-			List<Repeater> repeaters = analogueRepeaters.get(zone);
+		int k = Math.floorDiv( (analogueRepeaters.size() + dmrRepeaters.size()), 10 );
+		clusters.run(k, 16, 10);
 
-			Collections.sort(repeaters, new LocationComparator());
+		ScatterChart chart = new ScatterChart();
+		chart.chart(clusters.getClusters(), String.format("utils/map-%s.png", filter.getFilterName()));
 
-			int count = 0;
-			for (Repeater repeater : analogueRepeaters.get(zone)) {
-				int set = Math.round(count / radioProfile.getMaxChannelsPerScanList());
-				codeplug.addAnalogueRepeater(zone + "-" + set, // Zone Name
-						repeater.name, // Repeater name (used for channel name)
-						repeater.output, // Repeater output frequency (device receive frequency)
-						repeater.input, // Repeater input frequency (device transmit frequency)
-						repeater.tone, // CTCSS Tone Frequency
-						repeater.addToScanList // Add to scan list?
-				);
-				count++;
+		Map<String, Nominatim_Address> originAddresses = new HashMap<String, Nominatim_Address>();
+
+		for (String clusterId : clusters.getClusters().keySet()) {
+			Point origin;
+			try {
+				origin = clusters.getOrigin(clusterId);
+				originAddresses.put(clusterId, getRegionName(origin.getLatitude(), origin.getLongitude()));
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
 
-		try {
-			Map<Integer, ArrayList<KMeansPoint>> clusters = kmeans.run(5);
-			KMeansChart chart = new KMeansChart();
-			chart.chart(clusters, String.format("utils/map-%s.png", filter.getFilterName()));
-		} catch (KMeansException e) {
-			e.printStackTrace();
+		for (String clusterId : originAddresses.keySet()) {
+			logger.debug(String.format("%s: %s", clusterId, originAddresses.get(clusterId).toJson()));
+		}
+
+		// We want to look for the largest unique are in the address field to represent
+		// the cluster
+		Map<String, String> clusterName = new HashMap<String, String>();
+		String[] addressFields = { "country", "state", "state_district", "county", "city" };
+		for (String clusterId : originAddresses.keySet()) {
+			Nominatim_Address clusterAddress = originAddresses.get(clusterId);
+			int biggestArea = 0;
+			logger.debug(String.format("Processing %s: %s", clusterId, clusterAddress.toJson()));
+			for (String otherClusterId : originAddresses.keySet()) {
+				if (otherClusterId.equals(clusterId)) {
+					logger.debug("Skipping " + otherClusterId);
+					continue;
+				}
+				Nominatim_Address otherClusterAddress = originAddresses.get(otherClusterId);
+				logger.debug(String.format("Checking against %s: %s", otherClusterId, otherClusterAddress.toJson()));
+				for (int j = biggestArea; j < addressFields.length; j++) {
+					if (clusterAddress.getFieldValue(addressFields[j]) == null) {
+						continue;
+					}
+					if (otherClusterAddress.getFieldValue(addressFields[j]) != null) {
+						if (otherClusterAddress.getFieldValue(addressFields[j])
+								.equals(clusterAddress.getFieldValue(addressFields[j]))) {
+							biggestArea++;
+						}
+					}
+				}
+				logger.debug("biggestArea is " + biggestArea);
+			}
+
+			while (clusterAddress.getFieldValue(addressFields[biggestArea]) == null
+					&& biggestArea < addressFields.length) {
+				logger.debug("increasing biggestArea value to " + (biggestArea + 1));
+				biggestArea++;
+				if ( biggestArea >= addressFields.length ) {
+					biggestArea--;
+				}
+			}
+
+			logger.debug(String.format("Biggest unique area for %s is %s (%d)", clusterId, addressFields[biggestArea],
+					biggestArea));
+
+			clusterName.put(clusterId, clusterAddress.getFieldValue(addressFields[biggestArea]));
+
+			logger.debug(String.format("Cluster %s is at %s", clusterId, clusterName.get(clusterId)));
+		}
+
+		// Finally, add the repeaters to the appropriate zone
+		for ( String repeaterKey : analogueRepeaters.keySet() ) {
+			AnalogueRepeater repeater = analogueRepeaters.get(repeaterKey);
+			logger.debug(String.format("%s: %s", repeaterKey, repeater.name));
+		}
+		for (String clusterId : clusters.getClusters().keySet()) {
+
+			String zoneName = reduceTitle(clusterName.get(clusterId), 16);
+
+			for (Point point : clusters.getClusters().get(clusterId)) {
+				logger.debug("Finding " + point.getId());
+				if ( analogueRepeaters.keySet().contains(point.getId()) ) {
+					AnalogueRepeater repeater = analogueRepeaters.get(point.getId());
+					logger.debug(repeater.toJson());
+					codeplug.addAnalogueRepeater(zoneName, // Zone Name
+							repeater.getName(), // Repeater name (used for channel name)
+							repeater.getOutput(), // Repeater output frequency (device receive frequency)
+							repeater.getInput(), // Repeater input frequency (device transmit frequency)
+							repeater.getTone(), // CTCSS Tone Frequency
+							repeater.isAddToScanList() // Add to scan list?
+					);
+				} else if ( dmrRepeaters.keySet().contains(point.getId()) ) {
+					DMRRepeater repeater = dmrRepeaters.get(point.getId());
+					logger.debug(repeater.toJson());
+					codeplug.addBasicDigitalRepeaterToZone(zoneName, // Zone Name
+							repeater.getName(), // Repeater name (used for channel name)
+							repeater.getOutput(), // Repeater output frequency (device receive frequency)
+							repeater.getInput(), // Repeater input frequency (device transmit frequency)
+							repeater.getColourCode(), // CTCSS Tone Frequency
+							repeater.getNetwork(), // DMR Network
+							repeater.isAddToScanList() // Add to scan list?
+					);
+				} else {
+					// ERROR - we couldn't find a record of the repeater details. This shouldn't happen...
+					// TODO: Better exception here
+					throw new Exception();
+				}
+			}
 		}
 
 		return codeplug;
@@ -484,6 +585,126 @@ public class MotoTools {
 		codeplug.addAnalogueRepeater("DV Hotspots", "UHF 6", 434.5250, 434.5250, new Tone(123), false);
 
 		return codeplug;
+	}
+
+	/*
+	 * Sample JSON
+	 * "boundingbox":["-34.44159","-34.4370994","-58.7086067","-58.7044712"]}
+	 */
+	class Nominatim {
+		int place_id;
+		String license;
+		String osm_type;
+		String osm_id;
+		double lat;
+		double lon;
+		String display_name;
+		Nominatim_Address address;
+	}
+
+	class Nominatim_Address {
+		String city;
+		String county;
+		String state_district;
+		String state;
+		String postcode;
+		String country;
+		String country_code;
+
+		public String getFieldValue(String fieldName) {
+			Field field;
+			try {
+				field = Nominatim_Address.class.getDeclaredField(fieldName);
+				return (String) field.get(this);
+			} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
+				e.printStackTrace();
+			}
+			return null;
+		}
+
+		public String toJson() {
+			return String.format(
+					"{'city':'%s', 'county':'%s', 'state_district':'%s', 'state':'%s', 'postcode':'%s', 'country':'%s', 'country_code':'%s'}",
+					city, county, state_district, state, postcode, country, country_code);
+		}
+	}
+
+	public static Nominatim_Address getRegionName(double latitude, double longitude) {
+		String urlString = String.format(
+				"https://nominatim.openstreetmap.org/reverse?format=json&lat=%f&lon=%f&zoom=10", latitude, longitude);
+
+		BufferedReader reader = null;
+		try {
+			URL url = new URL(urlString);
+			reader = new BufferedReader(new InputStreamReader(url.openStream()));
+			StringBuffer buffer = new StringBuffer();
+			int read;
+			char[] chars = new char[1024];
+			while ((read = reader.read(chars)) != -1) {
+				buffer.append(chars, 0, read);
+			}
+
+			Gson gson = new Gson();
+			Nominatim area = gson.fromJson(buffer.toString(), Nominatim.class);
+
+			return area.address;
+
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (reader != null)
+				try {
+					reader.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+		}
+		return null;
+	}
+
+	/*
+	 * Reduce a string to a defined maximum length, making some intelligent
+	 * decisions along the way.
+	 */
+	public static String reduceTitle(String str, int maxLength) {
+		if ( str.length() <= maxLength ) {
+			return str;
+		}
+		
+		// Reduce something like 'North Devon' to 'N Devon'
+		str.replaceAll("\\bNorth East\\b", "NE");
+		str.replaceAll("\\bNorth West\\b", "NW");
+		str.replaceAll("\\bSouth East\\b", "SE");
+		str.replaceAll("\\bSouth West\\b", "SW");
+		str.replaceAll("\\bNorth\\b", "N");
+		str.replaceAll("\\bSouth\\b", "S");
+		str.replaceAll("\\bEast\\b", "E");
+		str.replaceAll("\\bWest\\b", "E");
+		
+		if ( str.length() <= maxLength ) {
+			return str;
+		}
+		
+		// Reduce something like 'Bristol and Bath' to 'Bristol Bath'
+		str.replaceAll("\\band\\b", " ");
+		
+		if ( str.length() <= maxLength ) {
+			return str;
+		}
+		
+		// Reduce something like 'Sidmouth' to 'Sidm'th'
+		str.replaceAll("mouth\\b", "m'th");
+		
+		if ( str.length() <= maxLength ) {
+			return str;
+		}
+		
+		// Nuclear option...
+		str = str.substring(0, (maxLength - 1));
+						
+		return str;
 	}
 
 	public static String titleCase(String str) {

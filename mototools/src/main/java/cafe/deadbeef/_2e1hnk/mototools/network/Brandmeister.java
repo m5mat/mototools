@@ -8,7 +8,17 @@ public class Brandmeister extends AbstractNetwork {
 		
 		//this.roamNamePattern.put(91, "Worldwide");  // Not used in Brandmeister
 		
-		// Add Talkgroups
+		/* Add Talkgroups
+		 * 
+		 * arguments are:
+		 * 
+		 * 		int		timeslot (1/2)
+		 * 		int		talkgroup number
+		 * 		String	channel name
+		 * 		boolean	is this a calling channel? (Will be annotated with '*')
+		 * 		boolean add this channel to the scan list? (note: maximum of 16 channels on the scan list)
+		 */
+		
 		this.addTalkgroup(1, 91, "Worldwide", false, true);
 		this.addTalkgroup(1, 92, "Europe", false, true);
 		this.addTalkgroup(1, 93, "USA", false, true);
@@ -16,6 +26,9 @@ public class Brandmeister extends AbstractNetwork {
 		this.addTalkgroup(2, 9, "Reflectors", false, true);
 		this.addTalkgroup(2, 9990, "Echo Test", false, false);
 		this.addTalkgroup(1, 9990, "Echo Test", false, false);
+		
+		// Add Monitor Talkgroups
+		this.addMonitorTalkgroup(2, 9, "Reflectors", false, true);
 		
 		// Add Reflectors
 		this.addReflector(4000, "Unlink");

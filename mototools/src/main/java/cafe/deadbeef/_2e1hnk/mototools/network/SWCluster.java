@@ -11,5 +11,8 @@ public class SWCluster extends AbstractNetwork {
 		
 		this.addTalkgroup(1, 9, "Local", false, true);
 		this.addTalkgroup(2, 950, "Cluster", false, true, true);
+		
+		// Add Monitor Talkgroups
+		this.addMonitorTalkgroup(1, 9, "Local", false, true);
 	}
 }

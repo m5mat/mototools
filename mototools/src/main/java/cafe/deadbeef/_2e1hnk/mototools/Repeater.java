@@ -1,21 +1,51 @@
 package cafe.deadbeef._2e1hnk.mototools;
 
+import com.google.gson.Gson;
+
 public class Repeater {
-	public String zone;
 	public String name;
 	public Double output;
 	public Double input;
-	public Tone tone;
 	public boolean addToScanList;
-	public LatLng latlng;
 	
-	public Repeater(String zone, String name, Double output, Double input, Tone tone, boolean addToScanList, LatLng latlng) {
-		this.zone = zone;
+	public Repeater() {
+		
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
 		this.name = name;
+	}
+
+	public Double getOutput() {
+		return output;
+	}
+
+	public void setOutput(Double output) {
 		this.output = output;
+	}
+
+	public Double getInput() {
+		return input;
+	}
+
+	public void setInput(Double input) {
 		this.input = input;
-		this.tone = tone;
+	}
+
+	public boolean isAddToScanList() {
+		return addToScanList;
+	}
+
+	public void setAddToScanList(boolean addToScanList) {
 		this.addToScanList = addToScanList;
-		this.latlng = latlng;
+	}
+	
+	public String toJson() {
+		Gson gson = new Gson();
+		return gson.toJson(this);
 	}
 }

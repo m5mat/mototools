@@ -282,6 +282,9 @@ public class Codeplug {
 		RXTGLISTDLLTYPE rxListEntry = objectFactory.createRXTGLISTDLLTYPE();
 	}
 
+	/*
+	 * Add a digital repeater with its own zone
+	 */
 	public void addDigitalRepeater(String name, double rxFreq, double txFreq, int colourCode, AbstractNetwork network,
 			boolean addScanList) throws JAXBException {
 
@@ -542,6 +545,128 @@ public class Codeplug {
 		
 	}
 
+	/*
+	 * Add basic channels for a digital repeater to an existing zone
+	 */
+	public void addBasicDigitalRepeaterToZone(String zoneName, String name, double rxFreq, double txFreq, int colourCode, AbstractNetwork network,
+			boolean addScanList) throws JAXBException {
+
+		if (rxFreq < radioProfile.getMinFrequencyMhz() || txFreq < radioProfile.getMinFrequencyMhz()
+				|| rxFreq > radioProfile.getMaxFrequencyMhz() || txFreq > radioProfile.getMaxFrequencyMhz()) {
+			MotoTools.logger.info("Not adding analogue repeater " + name + " - frequency out of range");
+			return;
+		}
+
+		name = MotoTools.reduceTitle(name, radioProfile.getMaxZoneNameLength());
+		
+		MotoTools.logger.info("Adding digital repeater " + name + " to zone " + zoneName);
+
+		// find the next ID number
+		ZNPERASGNDLTTYPE zone = this.findOrCreateZone(zoneName);
+		int entryNumber = zone.getListID().intValue();
+
+		// TODO: Add one ZN_PER_ASGN_DLL_TYPE per channel to the zone here
+
+		SCANPERDLTTYPE scanList = null;
+
+		if (addScanList) {
+			scanList = this.findOrCreateScanList(zoneName);
+		}
+		
+		// Add talkgroups to zone
+		int channelListLetID = 0;
+		for (Talkgroup talkgroup : network.monitorTalkgroups) {
+
+			MotoTools.logger.info("Adding " + name + " " + talkgroup.getTalkGroupName());
+			
+			try {
+				if (addScanList) {
+					channelListLetID = this.addDigitalChannel(talkgroup.getSlot(), colourCode, name,
+							txFreq, rxFreq, talkgroup, scanList, false);
+				} else {
+					// This is probably wrong - haven't tested what happens if you don't want a scan list here
+					channelListLetID = this.addDigitalChannel(talkgroup.getSlot(), colourCode, name,
+							txFreq, rxFreq, talkgroup, null, false);
+				}
+			
+				MotoTools.logger
+						.debug("Adding Talkgroup " + talkgroup.getTalkGroupName() + " as ID " + channelListLetID);
+
+				ZNPERASGNDLLTYPE channel = new ZNPERASGNDLLTYPE();
+				channel.setListID(BigInteger.valueOf(entryNumber));
+				channel.setApplicable("Enabled");
+				channel.setListLetID(BigInteger.valueOf(channelListLetID));
+
+				// Unknown
+				ZNPERASGNDLLTYPENTLLISHTYPE znperasgndlltypeftllishtype = new ZNPERASGNDLLTYPENTLLISHTYPE();
+				znperasgndlltypeftllishtype.setListID(BigInteger.valueOf(entryNumber));
+				znperasgndlltypeftllishtype.setApplicable("Enabled");
+				znperasgndlltypeftllishtype.setValue("ZN_PER_ASGN_DLL_TYPE");
+				channel.setZNPERASGNDLLTYPENTLLISHTYPE(znperasgndlltypeftllishtype);
+
+				// Unknown
+				ZNPERASGNDLLTYPENTLLISHID znperasgndlltypeftllishid = new ZNPERASGNDLLTYPENTLLISHID();
+				znperasgndlltypeftllishid.setListID(BigInteger.valueOf(entryNumber));
+				znperasgndlltypeftllishid.setApplicable("Enabled");
+				znperasgndlltypeftllishid.setValue(BigInteger.valueOf(0));
+				channel.setZNPERASGNDLLTYPENTLLISHID(znperasgndlltypeftllishid);
+
+				// Unknown
+				ZPLLEQ zplleq = new ZPLLEQ();
+				zplleq.setListID(BigInteger.valueOf(entryNumber));
+				zplleq.setListLetID(BigInteger.valueOf(channelListLetID));
+				zplleq.setApplicable("Enabled");
+				zplleq.setValue(BigInteger.valueOf(1));
+				channel.setZPLLEQ(zplleq);
+
+				// Unknown
+				ZPPERSIT zppersit = new ZPPERSIT();
+				zppersit.setListID(BigInteger.valueOf(entryNumber));
+				zppersit.setListLetID(BigInteger.valueOf(channelListLetID));
+				zppersit.setApplicable("Enabled");
+				zppersit.setTypeID("CNV_PER_CMP_TYPE");
+				zppersit.setValue(BigInteger.valueOf(channelListLetID));
+				channel.setZPPERSIT(zppersit);
+
+				// Unknown
+				ZPPERSITTYPE zppersittype = new ZPPERSITTYPE();
+				zppersittype.setListID(BigInteger.valueOf(entryNumber));
+				zppersittype.setListLetID(BigInteger.valueOf(channelListLetID));
+				zppersittype.setApplicable("Enabled");
+				zppersittype.setValue("CNV_PER_CMP_TYPE");
+				channel.setZPPERSITTYPE(zppersittype);
+
+				// Unknown
+				ZPPERSITID zppersitid = new ZPPERSITID();
+				zppersitid.setListID(BigInteger.valueOf(entryNumber));
+				zppersitid.setListLetID(BigInteger.valueOf(channelListLetID));
+				zppersitid.setApplicable("Enabled");
+				zppersitid.setValue(BigInteger.valueOf(channelListLetID));
+				channel.setZPPERSITID(zppersitid);
+
+				// Unknown
+				ZPLRESERVED zplreserved = new ZPLRESERVED();
+				zplreserved.setListID(BigInteger.valueOf(entryNumber));
+				zplreserved.setListLetID(BigInteger.valueOf(channelListLetID));
+				zplreserved.setApplicable("Enabled");
+				zplreserved.setValue(BigInteger.valueOf(0));
+				channel.setZPLRESERVED(zplreserved);
+
+				zone.getZNPERASGNDLLTYPE().add(channel);
+
+				// If this is a roaming talkgroup, then find (or create) the roaming zone and
+				// add this talkgroup to it as a channel. TODO: need to set this channel's
+				// roaming group and create the roam list too!
+
+				channelListLetID++;
+				
+			} catch (ChannelListFullException e) {
+				MotoTools.logger.error("Channel List Full", e);
+			}
+			
+		}
+	}
+
 	// Add an analogue Repeater
 	// TODO: Check how many repeaters (channels) are already in the zone (max 160)
 	public void addAnalogueRepeater(String zoneName, String name, double rxFreq, double txFreq, Tone tone,
@@ -553,10 +678,7 @@ public class Codeplug {
 			return;
 		}
 
-		// Trim name, if necessary
-		if (name.length() > radioProfile.getMaxZoneNameLength()) {
-			name = name.substring(0, (radioProfile.getMaxZoneNameLength() - 1));
-		}
+		name = MotoTools.reduceTitle(name, radioProfile.getMaxZoneNameLength());
 
 		MotoTools.logger.info("Adding analogue repeater " + name + " to zone " + zoneName);
 

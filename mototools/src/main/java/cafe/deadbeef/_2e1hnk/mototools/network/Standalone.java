@@ -7,5 +7,8 @@ public class Standalone extends AbstractNetwork {
 		super(radioProfile);
 		this.addTalkgroup(1, 9, "Local", false, true);
 		this.addTalkgroup(2, 9, "Local", false, true);
+		
+		// Add Monitor Talkgroups
+		this.addMonitorTalkgroup(1, 9, "Local", false, true);
 	}
 }

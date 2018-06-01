@@ -52,16 +52,18 @@ public class PhoenixUK extends AbstractNetwork {
 		this.addTalkgroup(1, 235, "UK", true, true);
 		this.addTalkgroup(2, 801, "SE Eng", false, true, true);
 		this.addTalkgroup(2, 810, "SW Eng", false, true, true);
-		this.addTalkgroup(2, 820, "NW Eng", false, true, true);
+		//this.addTalkgroup(2, 820, "NW Eng", false, true, true);
 		this.addTalkgroup(2, 830, "Midl Eng", false, true, true);
 		this.addTalkgroup(2, 840, "East Eng", false, true, true);
-		this.addTalkgroup(2, 850, "Scotland", false, true, true);
-		this.addTalkgroup(2, 860, "NE Eng", false, true, true);
+		//this.addTalkgroup(2, 850, "Scotland", false, true, true);
+		//this.addTalkgroup(2, 860, "NE Eng", false, true, true);
 		this.addTalkgroup(2, 870, "Wales/Borders", false, true, true);
-		this.addTalkgroup(2, 880, "N Ireland", false, false, true);
+		//this.addTalkgroup(2, 880, "N Ireland", false, false, true);
 		this.addTalkgroup(2, 9990, "Echo Test", false, false);
 		// this.addTalkgroup(1, 260, "UK-Poland UA", false, false);
 		// this.addTalkgroup(1, 2351, "CQUK WiresX", false, false);
 
+		// Add Monitor Talkgroups
+		this.addMonitorTalkgroup(1, 235, "UK", false, true);
 	}
 }

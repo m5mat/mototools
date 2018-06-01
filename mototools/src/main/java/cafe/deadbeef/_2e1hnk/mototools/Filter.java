@@ -28,6 +28,8 @@ public class Filter {
 	 */
 
 	private Map<String, List<String>> filter = new HashMap<String, List<String>>();
+	
+	private Map<String, Integer> attributes = new HashMap<String, Integer>();
 
 	public Filter(String filterName) {
 		this.setFilterName(filterName);
@@ -86,5 +88,13 @@ public class Filter {
 
 	public void setFilterName(String filterName) {
 		this.filterName = filterName;
+	}
+	
+	public void addAttribute(String attributeName, int attributeValue) {
+		this.attributes.put(attributeName, attributeValue);
+	}
+	
+	public int getAttribute(String attributeName) {
+		return this.attributes.get(attributeName);
 	}
 }

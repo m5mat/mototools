@@ -29,5 +29,8 @@ public class Northern extends AbstractNetwork {
 		this.addTalkgroup(2, 870, "Wales/Borders", false, true);
 		this.addTalkgroup(1, 2351, "CQUK WiresX", false, false);
 		
+		// Add Monitor Talkgroups
+		this.addMonitorTalkgroup(1, 235, "UK", false, true);
+		
 	}
 }
