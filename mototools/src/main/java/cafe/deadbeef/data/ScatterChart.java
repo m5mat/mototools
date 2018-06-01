@@ -98,6 +98,9 @@ public class ScatterChart {
 	
 	// Note that the origin is at the upper left corner of the image, so the heights are inverted.
 	private Double latToY(int imageHeight, Double latitude, Double minLat, Double maxLat) {
+		double latRad = latitude * (Math.PI/180);
+		double mercN = Math.log(Math.tan((Math.PI/4)+(latRad/2)));
+		//return (imageHeight/2)-(imageHeight * mercN/(2*Math.PI));
 		// the 0.95 here is a fudge factor to correct for map projections
 		return (imageHeight - ( ( (latitude - minLat) / (maxLat-minLat) ) * imageHeight * 0.95 ));
 	}
