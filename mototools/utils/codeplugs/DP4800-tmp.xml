@@ -604,6 +604,7 @@
         <RC_OTABMRHTMINIMUMTIMER Applicable="Enabled" ListID="0">30</RC_OTABMRHTMINIMUMTIMER>
         <RC_OTABMRESPONSETIMER Applicable="Enabled" ListID="0">120</RC_OTABMRESPONSETIMER>
         <RC_OTABMREGISTRATIONREFRESHTIMER Applicable="Enabled" ListID="0">24</RC_OTABMREGISTRATIONREFRESHTIMER>
+        <RC_NOISESUPPRESSOR Applicable="Enabled" ListID="0">BASIC</RC_NOISESUPPRESSOR>
       </RAD_CFG_CMP_TYPE>
     </RAD_CFG_CMP_TYPE_GRP>
     <RAD_DISPLAY_CMP_TYPE_GRP SortType="None">
@@ -20488,7 +20489,7 @@
         <CP_RXTPLFREQ Applicable="NA" ListID="643">67.0</CP_RXTPLFREQ>
         <CP_RXDPLINV Applicable="NA" ListID="643">0</CP_RXDPLINV>
         <CP_TXDPLINV Applicable="NA" ListID="643">0</CP_TXDPLINV>
-        <CP_ARSEN Applicable="Enabled" ListID="643">0</CP_ARSEN>
+        <CP_ARSEN Applicable="Enabled" ListID="643">1</CP_ARSEN>
         <CP_USELD Applicable="Enabled" ListID="643">OFF</CP_USELD>
         <CP_XSQCHTY Applicable="NA" ListID="643">CSQ</CP_XSQCHTY>
         <CP_TXSQCHTY Applicable="NA" ListID="643">CSQ</CP_TXSQCHTY>
@@ -20598,7 +20599,7 @@
         <CP_PHONESYSIT TypeID="NONE" Applicable="Enabled" ListID="643">0</CP_PHONESYSIT>
         <CP_PHONESYSITTYPE Applicable="Enabled" ListID="643">NONE</CP_PHONESYSITTYPE>
         <CP_PHONESYSITID Applicable="Enabled" ListID="643">0</CP_PHONESYSITID>
-        <CP_ARSPLUS Applicable="Enabled" ListID="643">DISABLED</CP_ARSPLUS>
+        <CP_ARSPLUS Applicable="Enabled" ListID="643">ARS_SYSTEM_CHANGE</CP_ARSPLUS>
         <CP_LCPSTLSTIT TypeID="NONE" Applicable="NA" ListID="643">0</CP_LCPSTLSTIT>
         <CP_LCPSTLSTITTYPE Applicable="NA" ListID="643">NONE</CP_LCPSTLSTITTYPE>
         <CP_LCPSTLSTITID Applicable="NA" ListID="643">0</CP_LCPSTLSTITID>
@@ -20811,8 +20812,8 @@
           <DU_RVRTPERS TypeID="SELECTED" Applicable="Enabled" ListID="0" ListLetID="284">0</DU_RVRTPERS>
           <DU_RVRTPERSTYPE Applicable="Enabled" ListID="0" ListLetID="284">SELECTED</DU_RVRTPERSTYPE>
           <DU_RVRTPERSID Applicable="Enabled" ListID="0" ListLetID="284">0</DU_RVRTPERSID>
-          <DU_CALLLSTID Applicable="Enabled" ListID="0" ListLetID="284">234999</DU_CALLLSTID>
-          <DU_CALLALIAS Applicable="Enabled" ListID="0" ListLetID="284">APRS</DU_CALLALIAS>
+          <DU_CALLLSTID Applicable="Enabled" ListID="0" ListLetID="284">2343989</DU_CALLLSTID>
+          <DU_CALLALIAS Applicable="Enabled" ListID="0" ListLetID="284">M6IFZ Ian</DU_CALLALIAS>
           <DU_RINGTYPE Applicable="Enabled" ListID="0" ListLetID="284">NOSTYLE</DU_RINGTYPE>
           <DU_CONNECTTYPE Applicable="Disabled" ListID="0" ListLetID="284">USB</DU_CONNECTTYPE>
           <DUL_RESERVED Applicable="Enabled" ListID="0" ListLetID="284">0</DUL_RESERVED>
@@ -21086,6 +21087,17 @@
       </ST_SRCH_DLT_TYPE>
     </ST_SRCH_DLH_TYPE_GRP>
     <RX_TG_LIST_DLH_TYPE_GRP SortType="None">
+      <RX_TG_LIST_DLT_TYPE Applicable="Enabled" ListID="28" SortType="None">
+        <RX_TG_LIST_DLH_TYPE Applicable="Enabled" ListID="28">
+          <RXTG_LSTCTG Applicable="Enabled" ListID="28">1</RXTG_LSTCTG>
+          <RXTG_LEDSZ Applicable="Enabled" ListID="28">4</RXTG_LEDSZ>
+          <RXTG_LEQMAX Applicable="Enabled" ListID="28">16</RXTG_LEQMAX>
+          <RXTG_LLEQMAX Applicable="Enabled" ListID="28">1</RXTG_LLEQMAX>
+          <RX_TG_LIST_DLH_TYPE_FTLLISHTYPE Applicable="Enabled" ListID="28">RX_TG_LIST_DLL_TYPE</RX_TG_LIST_DLH_TYPE_FTLLISHTYPE>
+          <RX_TG_LIST_DLH_TYPE_FTLLISHID Applicable="Enabled" ListID="28">28</RX_TG_LIST_DLH_TYPE_FTLLISHID>
+          <RXTG_RXTGLISTALIAS Applicable="Enabled" ListID="28">Manx Rptrs TG822</RXTG_RXTGLISTALIAS>
+        </RX_TG_LIST_DLH_TYPE>
+      </RX_TG_LIST_DLT_TYPE>
     </RX_TG_LIST_DLH_TYPE_GRP>
     <SCAN_PER_DLH_TYPE_GRP SortType="None">
       <SCAN_PER_DLT_TYPE Applicable="Enabled" ListID="52" SortType="None">
@@ -21121,7 +21133,7 @@
         </SCAN_PER_DLH_TYPE>
       </SCAN_PER_DLT_TYPE>
     </SCAN_PER_DLH_TYPE_GRP>
-    <ZN_PER_ASGN_DLH_TYPE_GRP>
+    <ZN_PER_ASGN_DLH_TYPE_GRP SortType="None">
       <ZN_PER_ASGN_DLT_TYPE Applicable="Enabled" ListID="1" SortType="Position">
         <ZN_PER_ASGN_DLH_TYPE Applicable="Enabled" ListID="1">
           <ZP_LSTCTG Applicable="Enabled" ListID="1">1</ZP_LSTCTG>

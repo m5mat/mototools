@@ -9,8 +9,8 @@ public class SWCluster extends AbstractNetwork {
 		this.roamName.put(950, "SW Cluster");
 		this.roamRepeaters.put(950, new String[] {"All"});
 		
-		this.addTalkgroup(1, 9, "Local", false, true);
-		this.addTalkgroup(2, 950, "Cluster", false, true, true);
+		this.addTalkgroup(1, 9, "Local", false, false, true);
+		this.addTalkgroup(2, 950, "Cluster", false, true, false, true);
 		
 		// Add Monitor Talkgroups
 		this.addMonitorTalkgroup(1, 9, "Local", false, true);

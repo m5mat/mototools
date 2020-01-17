@@ -17,15 +17,16 @@ public class Brandmeister extends AbstractNetwork {
 		 * 		String	channel name
 		 * 		boolean	is this a calling channel? (Will be annotated with '*')
 		 * 		boolean add this channel to the scan list? (note: maximum of 16 channels on the scan list)
+		 * 		boolean enable ARS on this channel?
 		 */
 		
-		this.addTalkgroup(1, 91, "Worldwide", false, true);
-		this.addTalkgroup(1, 92, "Europe", false, true);
-		this.addTalkgroup(1, 93, "USA", false, true);
-		this.addTalkgroup(1, 9, "Local", false, true);
-		this.addTalkgroup(2, 9, "Reflectors", false, true);
-		this.addTalkgroup(2, 9990, "Echo Test", false, false);
-		this.addTalkgroup(1, 9990, "Echo Test", false, false);
+		this.addTalkgroup(1, 91, "Worldwide", false, true, true);
+		this.addTalkgroup(1, 92, "Europe", false, true, true);
+		this.addTalkgroup(1, 93, "USA", false, true, true);
+		this.addTalkgroup(1, 9, "Local", false, true, true);
+		this.addTalkgroup(2, 9, "Reflectors", false, true, true);
+		this.addTalkgroup(2, 9990, "Echo Test", false, true, false);
+		this.addTalkgroup(1, 9990, "Echo Test", false, true, false);
 		
 		// Add Monitor Talkgroups
 		this.addMonitorTalkgroup(2, 9, "Reflectors", false, true);
@@ -155,5 +156,6 @@ public class Brandmeister extends AbstractNetwork {
 		this.addReflector(4993, "Test Ref 4");
 		this.addReflector(4999, "Extend Routing");
 		this.addReflector(5000, "Status");
+		this.addReflector(234999, "APRS");
 	}
 }

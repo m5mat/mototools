@@ -1,0 +1,10 @@
+C:\Users\mattc\git\mototools\mototools\utils\codeplug-prepare-2\bin\Release\net461\CodeplugPrepare.exe.config
+C:\Users\mattc\git\mototools\mototools\utils\codeplug-prepare-2\bin\Release\net461\CodeplugPrepare.exe
+C:\Users\mattc\git\mototools\mototools\utils\codeplug-prepare-2\bin\Release\net461\CodeplugPrepare.pdb
+C:\Users\mattc\git\mototools\mototools\utils\codeplug-prepare-2\bin\Release\net461\dnlib.dll
+C:\Users\mattc\git\mototools\mototools\utils\codeplug-prepare-2\obj\Release\net461\CodeplugPrepare.csprojAssemblyReference.cache
+C:\Users\mattc\git\mototools\mototools\utils\codeplug-prepare-2\obj\Release\net461\CodeplugPrepare.AssemblyInfoInputs.cache
+C:\Users\mattc\git\mototools\mototools\utils\codeplug-prepare-2\obj\Release\net461\CodeplugPrepare.AssemblyInfo.cs
+C:\Users\mattc\git\mototools\mototools\utils\codeplug-prepare-2\obj\Release\net461\CodeplugPrepare.csproj.CopyComplete
+C:\Users\mattc\git\mototools\mototools\utils\codeplug-prepare-2\obj\Release\net461\CodeplugPrepare.exe
+C:\Users\mattc\git\mototools\mototools\utils\codeplug-prepare-2\obj\Release\net461\CodeplugPrepare.pdb

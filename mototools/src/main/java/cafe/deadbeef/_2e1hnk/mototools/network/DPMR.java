@@ -6,7 +6,7 @@ public class DPMR extends AbstractNetwork {
 
 	public DPMR(RadioProfile radioProfile) {
 		super(radioProfile);
-		this.addTalkgroup(1, 1, "", false, true);
+		this.addTalkgroup(1, 1, "", false, false, true);
 	}
 
 }

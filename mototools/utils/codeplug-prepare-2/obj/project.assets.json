@@ -1,0 +1,97 @@
+{
+  "version": 3,
+  "targets": {
+    ".NETFramework,Version=v4.6.1": {
+      "dnlib/1.6.1": {
+        "type": "package",
+        "compile": {
+          "lib/dnlib.dll": {}
+        },
+        "runtime": {
+          "lib/dnlib.dll": {}
+        }
+      }
+    },
+    ".NETFramework,Version=v4.6.1/win7-x86": {
+      "dnlib/1.6.1": {
+        "type": "package",
+        "compile": {
+          "lib/dnlib.dll": {}
+        },
+        "runtime": {
+          "lib/dnlib.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "dnlib/1.6.1": {
+      "sha512": "U1J1ESNi/3KTwe5/IP4cKz+dflDWODleOg4w/d0RoUi6gEYm7S0nmH16U377eivv5GZNr+4S7gC5eAH4SjKOsQ==",
+      "type": "package",
+      "path": "dnlib/1.6.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "dnlib.1.6.1.nupkg.sha512",
+        "dnlib.nuspec",
+        "lib/dnlib.dll"
+      ]
+    }
+  },
+  "projectFileDependencyGroups": {
+    ".NETFramework,Version=v4.6.1": [
+      "dnlib >= 1.6.1"
+    ]
+  },
+  "packageFolders": {
+    "C:\\Users\\mattc\\.nuget\\packages\\": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "C:\\Users\\mattc\\git\\mototools\\mototools\\utils\\codeplug-prepare-2\\CodeplugPrepare.csproj",
+      "projectName": "CodeplugPrepare",
+      "projectPath": "C:\\Users\\mattc\\git\\mototools\\mototools\\utils\\codeplug-prepare-2\\CodeplugPrepare.csproj",
+      "packagesPath": "C:\\Users\\mattc\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\mattc\\git\\mototools\\mototools\\utils\\codeplug-prepare-2\\obj\\",
+      "projectStyle": "PackageReference",
+      "configFilePaths": [
+        "C:\\Users\\mattc\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+      ],
+      "originalTargetFrameworks": [
+        "net461"
+      ],
+      "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "net461": {
+          "projectReferences": {}
+        }
+      },
+      "warningProperties": {
+        "warnAsError": [
+          "NU1605"
+        ]
+      }
+    },
+    "frameworks": {
+      "net461": {
+        "dependencies": {
+          "dnlib": {
+            "target": "Package",
+            "version": "[1.6.1, )"
+          }
+        },
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.0.100\\RuntimeIdentifierGraph.json"
+      }
+    },
+    "runtimes": {
+      "win7-x86": {
+        "#import": []
+      }
+    }
+  }
+}

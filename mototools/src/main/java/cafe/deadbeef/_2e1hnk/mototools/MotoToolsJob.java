@@ -5,14 +5,16 @@ import cafe.deadbeef._2e1hnk.mototools.radioprofiles.RadioProfile;
 public class MotoToolsJob {
 	private Integer radioId;
 	private RadioProfile radioProfile;
+	private String radioHumanName;
 	private Filter filter;
 	
 	public MotoToolsJob() {
 		
 	}
 	
-	public MotoToolsJob(Integer radioId, RadioProfile radioProfile, Filter filter) {
+	public MotoToolsJob(Integer radioId, String radioHumanName, RadioProfile radioProfile, Filter filter) {
 		this.setRadioId(radioId);
+		this.setRadioHumanName(radioHumanName);
 		this.setRadioProfile(radioProfile);
 		this.setFilter(filter);
 	}
@@ -29,6 +31,14 @@ public class MotoToolsJob {
 	public void setRadioProfile(RadioProfile radioProfile) {
 		this.radioProfile = radioProfile;
 	}
+	public String getRadioHumanName() {
+		return radioHumanName;
+	}
+
+	public void setRadioHumanName(String radioHumanName) {
+		this.radioHumanName = radioHumanName;
+	}
+
 	public Filter getFilter() {
 		return filter;
 	}

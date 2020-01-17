@@ -87,6 +87,10 @@ public class Codeplug {
 		return codeplug.getAPPPARTITION().getRADCFGCMPTYPEGRP().getRADCFGCMPTYPE().getRCSUBSCRIBERID().getValue()
 				.intValue();
 	}
+	
+	public void setArsId(int arsId) {
+		codeplug.getAPPPARTITION().getNETSETCMPTYPEGRP().getNETSETCMPTYPE().getNETSETARSRADIOID().setValue(BigInteger.valueOf(arsId));
+	}
 
 	public int addContact(int radioId, String contactName, boolean privateCall)
 			throws RadioIdOutOfRangeException, ContactListFullException {
@@ -825,6 +829,19 @@ public class Codeplug {
 			}
 		}
 		
+		if (talkgroup.enableArs) {
+			channel.getCPARSEN().setValue(BigInteger.valueOf(1));
+			/* One of
+			 * 		DISABLED
+			 * 		ARS_SYSTEM_CHANGE
+			 * 		ARS_SYS_SITE_CHANGE
+			 */
+			if ( isRoamChannel ) {
+				channel.getCPARSPLUS().setValue("ARS_SYS_SITE_CHANGE");
+			} else {
+				channel.getCPARSPLUS().setValue("ARS_SYSTEM_CHANGE");
+			}
+		}
 		channel.getCPCNVPERSALIAS().setContent(name);
 		channel.getCPTXFREQ().setValue(BigDecimal.valueOf(txFreq));
 		channel.getCPRXFREQ().setValue(BigDecimal.valueOf(rxFreq));

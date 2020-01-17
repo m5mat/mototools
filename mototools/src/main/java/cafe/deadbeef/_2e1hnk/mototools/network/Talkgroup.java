@@ -4,6 +4,7 @@ public class Talkgroup {
 	public int slot = 1;
 	public int talkGroupId = 0;
 	public String talkGroupName = null;
+	public boolean enableArs = false;
 	public boolean addToScanList = false;
 	public boolean roamingTalkgroup = false;
 	
@@ -11,13 +12,14 @@ public class Talkgroup {
 		
 	}
 	
-	public Talkgroup(int slot, int id, String name, boolean addToScanList) {
-		this(slot, id, name, addToScanList, false);
+	public Talkgroup(int slot, int id, String name, boolean enableArs, boolean addToScanList) {
+		this(slot, id, name, enableArs, addToScanList, false);
 	}
-	public Talkgroup(int slot, int id, String name, boolean addToScanList, boolean roamingTalkgroup) {
+	public Talkgroup(int slot, int id, String name, boolean enableArs, boolean addToScanList, boolean roamingTalkgroup) {
 		this.slot = slot;
 		this.talkGroupId = id;
 		this.talkGroupName = name;
+		this.enableArs = enableArs;
 		this.addToScanList = addToScanList;
 		this.roamingTalkgroup = roamingTalkgroup;
 	}
@@ -44,6 +46,14 @@ public class Talkgroup {
 
 	public void setTalkGroupName(String talkGroupName) {
 		this.talkGroupName = talkGroupName;
+	}
+
+	public boolean isEnableArs() {
+		return enableArs;
+	}
+
+	public void setEnableArs(boolean enableArs) {
+		this.enableArs = enableArs;
 	}
 
 	public boolean isAddToScanList() {

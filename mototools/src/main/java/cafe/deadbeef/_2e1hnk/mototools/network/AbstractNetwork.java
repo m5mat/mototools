@@ -10,6 +10,7 @@ import cafe.deadbeef._2e1hnk.mototools.radioprofiles.RadioProfile;
 
 public abstract class AbstractNetwork implements NetworkInterface {
 
+	public List<String> overrideRepeaters = new ArrayList<String>();	// Add callsigns here to force that callsign to be of this network type
 	public List<Talkgroup> talkgroups = new ArrayList<Talkgroup>();
 	public List<Talkgroup> monitorTalkgroups = new ArrayList<Talkgroup>(); // These are the talkgroups that will be 'monitored' on regional scan lists/zones (i.e. added alongside analogue repeaters)
 	public Map<Integer, String> reflectors = new HashMap<Integer, String>();
@@ -24,12 +25,12 @@ public abstract class AbstractNetwork implements NetworkInterface {
 	}
 
 	protected void addTalkgroup(int timeslot, int talkgroupNumber, String talkgroupName,
-			boolean callingChannel, boolean addToScanList) {
-		this.addTalkgroup(timeslot, talkgroupNumber, talkgroupName, callingChannel, addToScanList, false);
+			boolean callingChannel, boolean enableArs, boolean addToScanList) {
+		this.addTalkgroup(timeslot, talkgroupNumber, talkgroupName, callingChannel, enableArs, addToScanList, false);
 	}
 	
 	protected void addTalkgroup(int timeslot, int talkgroupNumber, String talkgroupName,
-				boolean callingChannel, boolean addToScanList, boolean roamingTalkgroup) {
+				boolean callingChannel, boolean enableArs, boolean addToScanList, boolean roamingTalkgroup) {
 		/*
 		 * Calculate the best name for the talkgroup, options (in descending length
 		 * order) are: - Name TGx Sy - Name TGx - Name x/y - Name x - Name
@@ -48,18 +49,18 @@ public abstract class AbstractNetwork implements NetworkInterface {
 		String tgName5 = String.format("%s%s", calling, talkgroupName);
 
 		if (tgName1.length() <= radioProfile.MAX_CHANNEL_NAME_LENGTH) {
-			talkgroups.add(new Talkgroup(timeslot, talkgroupNumber, tgName1, addToScanList, roamingTalkgroup));
+			talkgroups.add(new Talkgroup(timeslot, talkgroupNumber, tgName1, enableArs, addToScanList, roamingTalkgroup));
 		} else if (tgName2.length() <= radioProfile.MAX_CHANNEL_NAME_LENGTH) {
-			talkgroups.add(new Talkgroup(timeslot, talkgroupNumber, tgName2, addToScanList, roamingTalkgroup));
+			talkgroups.add(new Talkgroup(timeslot, talkgroupNumber, tgName2, enableArs, addToScanList, roamingTalkgroup));
 		} else if (tgName3.length() <= radioProfile.MAX_CHANNEL_NAME_LENGTH) {
-			talkgroups.add(new Talkgroup(timeslot, talkgroupNumber, tgName3, addToScanList, roamingTalkgroup));
+			talkgroups.add(new Talkgroup(timeslot, talkgroupNumber, tgName3, enableArs, addToScanList, roamingTalkgroup));
 		} else if (tgName4.length() <= radioProfile.MAX_CHANNEL_NAME_LENGTH) {
-			talkgroups.add(new Talkgroup(timeslot, talkgroupNumber, tgName4, addToScanList, roamingTalkgroup));
+			talkgroups.add(new Talkgroup(timeslot, talkgroupNumber, tgName4, enableArs, addToScanList, roamingTalkgroup));
 		} else if (tgName5.length() <= radioProfile.MAX_CHANNEL_NAME_LENGTH) {
-			talkgroups.add(new Talkgroup(timeslot, talkgroupNumber, tgName5, addToScanList, roamingTalkgroup));
+			talkgroups.add(new Talkgroup(timeslot, talkgroupNumber, tgName5, enableArs, addToScanList, roamingTalkgroup));
 		} else {
 			talkgroups.add(new Talkgroup(timeslot, talkgroupNumber,
-					tgName5.substring(0, (radioProfile.MAX_CHANNEL_NAME_LENGTH - 1)), addToScanList, roamingTalkgroup));
+					tgName5.substring(0, (radioProfile.MAX_CHANNEL_NAME_LENGTH - 1)), enableArs, addToScanList, roamingTalkgroup));
 		}
 	}
 

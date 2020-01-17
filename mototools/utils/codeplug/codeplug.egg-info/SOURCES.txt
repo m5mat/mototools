@@ -1,0 +1,9 @@
+README.rst
+codeplug.py
+setup.py
+codeplug.egg-info/PKG-INFO
+codeplug.egg-info/SOURCES.txt
+codeplug.egg-info/dependency_links.txt
+codeplug.egg-info/entry_points.txt
+codeplug.egg-info/requires.txt
+codeplug.egg-info/top_level.txt
